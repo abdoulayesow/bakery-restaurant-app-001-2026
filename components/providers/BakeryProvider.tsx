@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
+import { useSession } from 'next-auth/react'
 
 interface Bakery {
   id: string
@@ -18,12 +19,20 @@ interface BakeryContextType {
 const BakeryContext = createContext<BakeryContextType | null>(null)
 
 export function BakeryProvider({ children }: { children: ReactNode }) {
+  const { data: session, status } = useSession()
   const [bakeries, setBakeries] = useState<Bakery[]>([])
   const [currentBakery, setCurrentBakeryState] = useState<Bakery | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Fetch user's accessible bakeries
+  // Fetch user's accessible bakeries only when authenticated
   useEffect(() => {
+    // Skip fetching if not authenticated
+    if (status === 'loading') return
+    if (status === 'unauthenticated' || !session) {
+      setLoading(false)
+      return
+    }
+
     const fetchBakeries = async () => {
       try {
         const res = await fetch('/api/bakeries/my-bakeries')
@@ -51,7 +60,7 @@ export function BakeryProvider({ children }: { children: ReactNode }) {
     }
 
     fetchBakeries()
-  }, [])
+  }, [session, status])
 
   const setCurrentBakery = useCallback((bakery: Bakery) => {
     setCurrentBakeryState(bakery)

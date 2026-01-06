@@ -1,0 +1,26 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="#C45C26"/>
+
+  <!-- Inner circle -->
+  <circle cx="256" cy="256" r="180" fill="#FFF8E7"/>
+
+  <!-- Wheat stalk - center -->
+  <path d="M256 400V180" stroke="#8B3A14" stroke-width="16" stroke-linecap="round"/>
+
+  <!-- Left wheat grains -->
+  <ellipse cx="200" cy="140" rx="28" ry="48" fill="#C45C26" transform="rotate(-20 200 140)"/>
+  <ellipse cx="185" cy="200" rx="24" ry="42" fill="#E07B3C" transform="rotate(-25 185 200)"/>
+  <ellipse cx="195" cy="260" rx="20" ry="36" fill="#C45C26" transform="rotate(-30 195 260)"/>
+
+  <!-- Right wheat grains -->
+  <ellipse cx="312" cy="140" rx="28" ry="48" fill="#C45C26" transform="rotate(20 312 140)"/>
+  <ellipse cx="327" cy="200" rx="24" ry="42" fill="#E07B3C" transform="rotate(25 327 200)"/>
+  <ellipse cx="317" cy="260" rx="20" ry="36" fill="#C45C26" transform="rotate(30 317 260)"/>
+
+  <!-- Top grain -->
+  <ellipse cx="256" cy="100" rx="28" ry="42" fill="#8B3A14"/>
+
+  <!-- Decorative dot -->
+  <circle cx="256" cy="350" r="14" fill="#C45C26"/>
+</svg>
