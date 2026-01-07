@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Edit2, Trash2, Plus, Minus, History, ChevronUp, ChevronDown } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Edit2, Trash2, Plus, Minus, History, ChevronUp, ChevronDown, Eye } from 'lucide-react'
 import { useLocale } from '@/components/providers/LocaleProvider'
 import { StockStatusBadge, StockStatus } from './StockStatusBadge'
 import { getCategoryLabel } from './CategoryFilter'
@@ -46,8 +47,14 @@ export function InventoryTable({
   onViewHistory,
 }: InventoryTableProps) {
   const { t, locale } = useLocale()
+  const router = useRouter()
   const [sortField, setSortField] = useState<SortField>('name')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+
+  // Handle row click to navigate to detail page
+  const handleRowClick = (itemId: string) => {
+    router.push(`/inventory/${itemId}`)
+  }
 
   // Sort items
   const sortedItems = [...items].sort((a, b) => {
@@ -159,7 +166,8 @@ export function InventoryTable({
             {sortedItems.map((item) => (
               <tr
                 key={item.id}
-                className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                onClick={() => handleRowClick(item.id)}
+                className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
               >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -187,14 +195,30 @@ export function InventoryTable({
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                   <div className="flex items-center justify-end gap-1">
                     <button
-                      onClick={() => onAdjust(item)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleRowClick(item.id)
+                      }}
+                      className="p-2 text-gray-500 hover:text-gold-600 dark:text-gray-400 dark:hover:text-gold-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      title={t('common.view') + ' ' + t('common.view')}
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onAdjust(item)
+                      }}
                       className="p-2 text-gray-500 hover:text-gold-600 dark:text-gray-400 dark:hover:text-gold-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                       title={t('inventory.adjust')}
                     >
                       <Plus className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => onViewHistory(item)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onViewHistory(item)
+                      }}
                       className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                       title={t('inventory.movementHistory')}
                     >
@@ -203,14 +227,20 @@ export function InventoryTable({
                     {isManager && (
                       <>
                         <button
-                          onClick={() => onEdit(item)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onEdit(item)
+                          }}
                           className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                           title={t('common.edit')}
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => onDelete(item)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onDelete(item)
+                          }}
                           className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                           title={t('common.delete')}
                         >

@@ -360,5 +360,20 @@
     "deleted": "Deleted successfully",
     "approved": "Approved successfully",
     "rejected": "Rejected"
+  },
+  "settings": {
+    "title": "Bakery Settings",
+    "subtitle": "Configure your bakery operational settings",
+    "stockDeduction": "Stock Deduction Settings",
+    "stockDeductionDesc": "Choose when inventory stock should be deducted for production logs.",
+    "immediateMode": "Immediate Deduction",
+    "immediateModeDesc": "Stock is deducted immediately when production is logged. This reserves ingredients and prevents over-allocation.",
+    "deferredMode": "Deferred Deduction",
+    "deferredModeDesc": "Stock is only deducted when production status is marked as Complete. This allows planning without committing inventory.",
+    "recommended": "Recommended for most bakeries",
+    "advanced": "Advanced: Requires careful stock monitoring",
+    "settingsSaved": "Settings saved successfully",
+    "moreSettings": "More Settings",
+    "comingSoon": "Additional configuration options coming soon..."
   }
 }

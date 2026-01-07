@@ -360,5 +360,20 @@
     "deleted": "Supprimé avec succès",
     "approved": "Approuvé avec succès",
     "rejected": "Rejeté"
+  },
+  "settings": {
+    "title": "Paramètres de la Boulangerie",
+    "subtitle": "Configurez les paramètres opérationnels de votre boulangerie",
+    "stockDeduction": "Paramètres de Déduction de Stock",
+    "stockDeductionDesc": "Choisissez quand le stock d'inventaire doit être déduit pour les journaux de production.",
+    "immediateMode": "Déduction Immédiate",
+    "immediateModeDesc": "Le stock est déduit immédiatement lors de l'enregistrement de la production. Cela réserve les ingrédients et évite la surallocation.",
+    "deferredMode": "Déduction Différée",
+    "deferredModeDesc": "Le stock n'est déduit que lorsque le statut de production est marqué comme Complet. Cela permet la planification sans engager l'inventaire.",
+    "recommended": "Recommandé pour la plupart des boulangeries",
+    "advanced": "Avancé: Nécessite une surveillance attentive du stock",
+    "settingsSaved": "Paramètres enregistrés avec succès",
+    "moreSettings": "Plus de Paramètres",
+    "comingSoon": "Options de configuration supplémentaires à venir..."
   }
 }

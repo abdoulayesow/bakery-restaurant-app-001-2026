@@ -372,6 +372,488 @@ async function main() {
   }
   console.log(`✅ Created ${suppliers.length} suppliers`)
 
+  // Create sample production logs with various statuses
+  const productionLogs = [
+    // Baguettes - Complete with stock deducted
+    {
+      id: 'prod-001',
+      bakeryId: bakery.id,
+      date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), // 6 days ago
+      productName: 'Baguettes',
+      productNameFr: 'Baguettes',
+      quantity: 200,
+      ingredients: ['Wheat Flour', 'Water', 'Yeast', 'Salt'],
+      ingredientDetails: [
+        { itemId: 'inv-flour-001', itemName: 'Wheat Flour', quantity: 40, unit: 'kg', unitCostGNF: 15000 },
+        { itemId: 'inv-yeast-001', itemName: 'Yeast', quantity: 0.5, unit: 'kg', unitCostGNF: 35000 },
+        { itemId: 'inv-salt-001', itemName: 'Salt', quantity: 1, unit: 'kg', unitCostGNF: 3000 },
+      ],
+      estimatedCostGNF: 620500,
+      preparationStatus: 'Complete',
+      status: 'Approved',
+      stockDeducted: true,
+      stockDeductedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+      createdBy: user.id,
+      createdByName: user.name,
+    },
+    // Croissants - In Progress
+    {
+      id: 'prod-002',
+      bakeryId: bakery.id,
+      date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      productName: 'Croissants',
+      productNameFr: 'Croissants',
+      quantity: 100,
+      ingredients: ['Wheat Flour', 'Butter', 'Sugar', 'Yeast', 'Milk'],
+      ingredientDetails: [
+        { itemId: 'inv-flour-001', itemName: 'Wheat Flour', quantity: 25, unit: 'kg', unitCostGNF: 15000 },
+        { itemId: 'inv-butter-001', itemName: 'Butter', quantity: 15, unit: 'kg', unitCostGNF: 45000 },
+        { itemId: 'inv-sugar-001', itemName: 'Sugar', quantity: 5, unit: 'kg', unitCostGNF: 12000 },
+        { itemId: 'inv-yeast-001', itemName: 'Yeast', quantity: 0.3, unit: 'kg', unitCostGNF: 35000 },
+        { itemId: 'inv-milk-001', itemName: 'Milk', quantity: 3, unit: 'liters', unitCostGNF: 8000 },
+      ],
+      estimatedCostGNF: 1119500,
+      preparationStatus: 'InProgress',
+      status: 'Pending',
+      stockDeducted: true,
+      stockDeductedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      createdBy: user.id,
+      createdByName: user.name,
+    },
+    // Pain au Chocolat - Ready
+    {
+      id: 'prod-003',
+      bakeryId: bakery.id,
+      date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+      productName: 'Pain au Chocolat',
+      productNameFr: 'Pain au Chocolat',
+      quantity: 80,
+      ingredients: ['Wheat Flour', 'Butter', 'Sugar', 'Eggs'],
+      ingredientDetails: [
+        { itemId: 'inv-flour-001', itemName: 'Wheat Flour', quantity: 20, unit: 'kg', unitCostGNF: 15000 },
+        { itemId: 'inv-butter-001', itemName: 'Butter', quantity: 10, unit: 'kg', unitCostGNF: 45000 },
+        { itemId: 'inv-sugar-001', itemName: 'Sugar', quantity: 8, unit: 'kg', unitCostGNF: 12000 },
+        { itemId: 'inv-eggs-001', itemName: 'Eggs', quantity: 50, unit: 'units', unitCostGNF: 2500 },
+      ],
+      estimatedCostGNF: 871000,
+      preparationStatus: 'Ready',
+      status: 'Pending',
+      stockDeducted: false,
+      createdBy: user.id,
+      createdByName: user.name,
+    },
+    // Baguettes - Today Planning (deferred mode test)
+    {
+      id: 'prod-004',
+      bakeryId: bakery.id,
+      date: new Date(),
+      productName: 'Baguettes',
+      productNameFr: 'Baguettes',
+      quantity: 150,
+      ingredients: ['Wheat Flour', 'Yeast', 'Salt'],
+      ingredientDetails: [
+        { itemId: 'inv-flour-001', itemName: 'Wheat Flour', quantity: 30, unit: 'kg', unitCostGNF: 15000 },
+        { itemId: 'inv-yeast-001', itemName: 'Yeast', quantity: 0.4, unit: 'kg', unitCostGNF: 35000 },
+        { itemId: 'inv-salt-001', itemName: 'Salt', quantity: 0.8, unit: 'kg', unitCostGNF: 3000 },
+      ],
+      estimatedCostGNF: 466400,
+      preparationStatus: 'Planning',
+      status: 'Pending',
+      stockDeducted: false,
+      createdBy: user.id,
+      createdByName: user.name,
+    },
+  ]
+
+  for (const log of productionLogs) {
+    await prisma.productionLog.upsert({
+      where: { id: log.id },
+      update: {},
+      create: log,
+    })
+  }
+  console.log(`✅ Created ${productionLogs.length} production logs`)
+
+  // Create stock movements for production
+  const productionMovements = [
+    // Baguettes production movements (prod-001)
+    {
+      id: 'movement-prod-001-flour',
+      bakeryId: bakery.id,
+      itemId: 'inv-flour-001',
+      type: 'Usage',
+      quantity: -40,
+      unitCost: 15000,
+      reason: 'Production: Baguettes (qty: 200)',
+      productionLogId: 'prod-001',
+      createdBy: user.id,
+      createdByName: user.name,
+      createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'movement-prod-001-yeast',
+      bakeryId: bakery.id,
+      itemId: 'inv-yeast-001',
+      type: 'Usage',
+      quantity: -0.5,
+      unitCost: 35000,
+      reason: 'Production: Baguettes (qty: 200)',
+      productionLogId: 'prod-001',
+      createdBy: user.id,
+      createdByName: user.name,
+      createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'movement-prod-001-salt',
+      bakeryId: bakery.id,
+      itemId: 'inv-salt-001',
+      type: 'Usage',
+      quantity: -1,
+      unitCost: 3000,
+      reason: 'Production: Baguettes (qty: 200)',
+      productionLogId: 'prod-001',
+      createdBy: user.id,
+      createdByName: user.name,
+      createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+    },
+    // Croissants production movements (prod-002)
+    {
+      id: 'movement-prod-002-flour',
+      bakeryId: bakery.id,
+      itemId: 'inv-flour-001',
+      type: 'Usage',
+      quantity: -25,
+      unitCost: 15000,
+      reason: 'Production: Croissants (qty: 100)',
+      productionLogId: 'prod-002',
+      createdBy: user.id,
+      createdByName: user.name,
+      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'movement-prod-002-butter',
+      bakeryId: bakery.id,
+      itemId: 'inv-butter-001',
+      type: 'Usage',
+      quantity: -15,
+      unitCost: 45000,
+      reason: 'Production: Croissants (qty: 100)',
+      productionLogId: 'prod-002',
+      createdBy: user.id,
+      createdByName: user.name,
+      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    },
+    // Purchase movements
+    {
+      id: 'movement-purchase-sugar',
+      bakeryId: bakery.id,
+      itemId: 'inv-sugar-001',
+      type: 'Purchase',
+      quantity: 50,
+      unitCost: 12000,
+      reason: 'Weekly restock',
+      createdBy: user.id,
+      createdByName: user.name,
+      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'movement-purchase-butter',
+      bakeryId: bakery.id,
+      itemId: 'inv-butter-001',
+      type: 'Purchase',
+      quantity: 20,
+      unitCost: 45000,
+      reason: 'Weekly restock',
+      createdBy: user.id,
+      createdByName: user.name,
+      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    },
+    // Waste movement
+    {
+      id: 'movement-waste-eggs',
+      bakeryId: bakery.id,
+      itemId: 'inv-eggs-001',
+      type: 'Waste',
+      quantity: -10,
+      unitCost: 2500,
+      reason: 'Expired eggs',
+      createdBy: user.id,
+      createdByName: user.name,
+      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    },
+    // Adjustment
+    {
+      id: 'movement-adjust-milk',
+      bakeryId: bakery.id,
+      itemId: 'inv-milk-001',
+      type: 'Adjustment',
+      quantity: 5,
+      unitCost: 8000,
+      reason: 'Inventory count correction',
+      createdBy: user.id,
+      createdByName: user.name,
+      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    },
+  ]
+
+  for (const movement of productionMovements) {
+    await prisma.stockMovement.upsert({
+      where: { id: movement.id },
+      update: {},
+      create: movement as any,
+    })
+  }
+  console.log(`✅ Created ${productionMovements.length} additional stock movements`)
+
+  // Update inventory stock levels to reflect movements
+  await prisma.inventoryItem.update({
+    where: { id: 'inv-flour-001' },
+    data: { currentStock: 85 }, // 150 - 40 - 25
+  })
+  await prisma.inventoryItem.update({
+    where: { id: 'inv-yeast-001' },
+    data: { currentStock: 4.5 }, // 5 - 0.5
+  })
+  await prisma.inventoryItem.update({
+    where: { id: 'inv-salt-001' },
+    data: { currentStock: 29 }, // 30 - 1
+  })
+  await prisma.inventoryItem.update({
+    where: { id: 'inv-butter-001' },
+    data: { currentStock: 10 }, // 25 + 20 - 15 = 30, then set to 10 (below min)
+  })
+  await prisma.inventoryItem.update({
+    where: { id: 'inv-sugar-001' },
+    data: { currentStock: 130 }, // 80 + 50
+  })
+  await prisma.inventoryItem.update({
+    where: { id: 'inv-eggs-001' },
+    data: { currentStock: 110 }, // 120 - 10
+  })
+  await prisma.inventoryItem.update({
+    where: { id: 'inv-milk-001' },
+    data: { currentStock: 20 }, // 15 + 5
+  })
+  console.log('✅ Updated inventory stock levels')
+
+  // Create sample sales
+  const sales = [
+    {
+      id: 'sale-001',
+      bakeryId: bakery.id,
+      date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+      totalGNF: 2500000,
+      cashGNF: 1500000,
+      orangeMoneyGNF: 800000,
+      cardGNF: 200000,
+      itemsCount: 450,
+      customersCount: 120,
+      status: 'Approved',
+      submittedBy: user.id,
+      submittedByName: user.name,
+      approvedBy: user.id,
+      approvedByName: user.name,
+      approvedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'sale-002',
+      bakeryId: bakery.id,
+      date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      totalGNF: 2800000,
+      cashGNF: 1800000,
+      orangeMoneyGNF: 900000,
+      cardGNF: 100000,
+      itemsCount: 520,
+      customersCount: 145,
+      status: 'Approved',
+      submittedBy: user.id,
+      submittedByName: user.name,
+      approvedBy: user.id,
+      approvedByName: user.name,
+      approvedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'sale-003',
+      bakeryId: bakery.id,
+      date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+      totalGNF: 2200000,
+      cashGNF: 1400000,
+      orangeMoneyGNF: 700000,
+      cardGNF: 100000,
+      itemsCount: 400,
+      customersCount: 110,
+      status: 'Approved',
+      submittedBy: user.id,
+      submittedByName: user.name,
+      approvedBy: user.id,
+      approvedByName: user.name,
+      approvedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: 'sale-004',
+      bakeryId: bakery.id,
+      date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      totalGNF: 3100000,
+      cashGNF: 2000000,
+      orangeMoneyGNF: 1000000,
+      cardGNF: 100000,
+      itemsCount: 580,
+      customersCount: 165,
+      status: 'Pending',
+      submittedBy: user.id,
+      submittedByName: user.name,
+    },
+    {
+      id: 'sale-005',
+      bakeryId: bakery.id,
+      date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      totalGNF: 2900000,
+      cashGNF: 1700000,
+      orangeMoneyGNF: 1100000,
+      cardGNF: 100000,
+      itemsCount: 510,
+      customersCount: 150,
+      status: 'Pending',
+      submittedBy: user.id,
+      submittedByName: user.name,
+    },
+  ]
+
+  for (const sale of sales) {
+    await prisma.sale.upsert({
+      where: { id: sale.id },
+      update: {},
+      create: sale,
+    })
+  }
+  console.log(`✅ Created ${sales.length} sales records`)
+
+  // Create sample expenses
+  const flourCat = await prisma.category.findUnique({ where: { name: 'Flour' } })
+  const butterCat = await prisma.category.findUnique({ where: { name: 'Butter' } })
+  const electricityCat = await prisma.category.findUnique({ where: { name: 'Electricity' } })
+  const salariesCat = await prisma.category.findUnique({ where: { name: 'Staff Salaries' } })
+
+  const expenses = [
+    // Inventory purchase - Flour (with ExpenseItems)
+    {
+      id: 'exp-001',
+      bakeryId: bakery.id,
+      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      categoryId: flourCat?.id,
+      categoryName: 'Flour',
+      amountGNF: 2250000, // 150 kg * 15000
+      paymentMethod: 'Cash',
+      description: 'Weekly flour purchase',
+      isInventoryPurchase: true,
+      status: 'Approved',
+      submittedBy: user.id,
+      submittedByName: user.name,
+      approvedBy: user.id,
+      approvedByName: user.name,
+      approvedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      supplierId: 'sup-moulin',
+    },
+    // Inventory purchase - Butter & Sugar (with ExpenseItems)
+    {
+      id: 'exp-002',
+      bakeryId: bakery.id,
+      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      categoryId: butterCat?.id,
+      categoryName: 'Butter',
+      amountGNF: 1500000, // 20kg butter * 45000 + 50kg sugar * 12000
+      paymentMethod: 'OrangeMoney',
+      description: 'Weekly butter and sugar restock',
+      isInventoryPurchase: true,
+      status: 'Approved',
+      submittedBy: user.id,
+      submittedByName: user.name,
+      approvedBy: user.id,
+      approvedByName: user.name,
+      approvedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      supplierId: 'sup-laiterie',
+    },
+    // Electricity bill
+    {
+      id: 'exp-003',
+      bakeryId: bakery.id,
+      date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      categoryId: electricityCat?.id,
+      categoryName: 'Electricity',
+      amountGNF: 850000,
+      paymentMethod: 'Cash',
+      description: 'Monthly electricity bill',
+      isInventoryPurchase: false,
+      status: 'Approved',
+      submittedBy: user.id,
+      submittedByName: user.name,
+      approvedBy: user.id,
+      approvedByName: user.name,
+      approvedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+      supplierId: 'sup-edg',
+    },
+    // Staff salaries
+    {
+      id: 'exp-004',
+      bakeryId: bakery.id,
+      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      categoryId: salariesCat?.id,
+      categoryName: 'Staff Salaries',
+      amountGNF: 5000000,
+      paymentMethod: 'OrangeMoney',
+      description: 'Monthly staff salaries',
+      isInventoryPurchase: false,
+      status: 'Pending',
+      submittedBy: user.id,
+      submittedByName: user.name,
+    },
+  ]
+
+  for (const expense of expenses) {
+    await prisma.expense.upsert({
+      where: { id: expense.id },
+      update: {},
+      create: expense,
+    })
+  }
+  console.log(`✅ Created ${expenses.length} expense records`)
+
+  // Create ExpenseItems for inventory purchases
+  const expenseItems = [
+    // exp-001 - Flour purchase
+    {
+      id: 'exp-item-001',
+      expenseId: 'exp-001',
+      inventoryItemId: 'inv-flour-001',
+      quantity: 150,
+      unitCostGNF: 15000,
+    },
+    // exp-002 - Butter and sugar
+    {
+      id: 'exp-item-002',
+      expenseId: 'exp-002',
+      inventoryItemId: 'inv-butter-001',
+      quantity: 20,
+      unitCostGNF: 45000,
+    },
+    {
+      id: 'exp-item-003',
+      expenseId: 'exp-002',
+      inventoryItemId: 'inv-sugar-001',
+      quantity: 50,
+      unitCostGNF: 12000,
+    },
+  ]
+
+  for (const item of expenseItems) {
+    await prisma.expenseItem.upsert({
+      where: { id: item.id },
+      update: {},
+      create: item,
+    })
+  }
+  console.log(`✅ Created ${expenseItems.length} expense items`)
+
   console.log('')
   console.log('🎉 Seed completed successfully!')
   console.log('')
@@ -382,9 +864,15 @@ async function main() {
   console.log(`     • ${bakery3.name} (${bakery3.location})`)
   console.log(`   - User: ${user.email} (${user.role})`)
   console.log(`   - Inventory Items: ${inventoryItems.length}`)
+  console.log(`   - Production Logs: ${productionLogs.length}`)
+  console.log(`   - Stock Movements: ${productionMovements.length + 1}`)
+  console.log(`   - Sales Records: ${sales.length}`)
+  console.log(`   - Expenses: ${expenses.length}`)
+  console.log(`   - Expense Items: ${expenseItems.length}`)
   console.log('')
   console.log('🚀 You can now login and access the app!')
   console.log('💡 Test bakery switching by clicking the logo!')
+  console.log('📊 Dashboard now has real data for visualization!')
 }
 
 main()

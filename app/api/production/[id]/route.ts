@@ -168,6 +168,104 @@ export async function PATCH(
       updateData.quantity = quantity
     }
 
+    // Check if we're changing status to Complete and stock hasn't been deducted yet
+    const isChangingToComplete =
+      preparationStatus === ProductionStatus.Complete &&
+      existingLog.preparationStatus !== ProductionStatus.Complete
+
+    const needsDeferredDeduction = isChangingToComplete && !existingLog.stockDeducted
+
+    // If deferred deduction is needed, execute it in a transaction
+    if (needsDeferredDeduction) {
+      const ingredientDetails = existingLog.ingredientDetails as any[]
+
+      if (ingredientDetails && ingredientDetails.length > 0) {
+        await prisma.$transaction(async (tx) => {
+          // Re-validate ingredient availability
+          const itemIds = ingredientDetails.map((ing) => ing.itemId)
+          const inventoryItems = await tx.inventoryItem.findMany({
+            where: {
+              id: { in: itemIds },
+              bakeryId: existingLog.bakeryId,
+              isActive: true,
+            },
+          })
+
+          const itemMap = new Map(inventoryItems.map((item) => [item.id, item]))
+
+          // Check for insufficient stock
+          for (const ingredient of ingredientDetails) {
+            const item = itemMap.get(ingredient.itemId)
+            if (!item) {
+              throw new Error(`Ingredient not found: ${ingredient.itemName}`)
+            }
+            if (item.currentStock < ingredient.quantity) {
+              throw new Error(
+                `Insufficient stock for ${item.name}: have ${item.currentStock}, need ${ingredient.quantity}`
+              )
+            }
+          }
+
+          // Create stock movements and update inventory
+          for (const ingredient of ingredientDetails) {
+            await tx.stockMovement.create({
+              data: {
+                bakeryId: existingLog.bakeryId,
+                itemId: ingredient.itemId,
+                type: 'Usage' as any,
+                quantity: -ingredient.quantity,
+                unitCost: ingredient.unitCostGNF,
+                reason: `Production: ${existingLog.productName} (qty: ${existingLog.quantity})`,
+                productionLogId: id,
+                createdBy: session.user.id,
+                createdByName: session.user.name || session.user.email || undefined,
+              },
+            })
+
+            await tx.inventoryItem.update({
+              where: { id: ingredient.itemId },
+              data: {
+                currentStock: {
+                  decrement: ingredient.quantity,
+                },
+              },
+            })
+          }
+
+          // Update production log to mark stock as deducted
+          await tx.productionLog.update({
+            where: { id },
+            data: {
+              stockDeducted: true,
+              stockDeductedAt: new Date(),
+              ...updateData,
+            },
+          })
+        })
+
+        // Fetch the updated production log
+        const productionLog = await prisma.productionLog.findUnique({
+          where: { id },
+          include: {
+            stockMovements: {
+              include: {
+                item: {
+                  select: {
+                    id: true,
+                    name: true,
+                    unit: true,
+                  },
+                },
+              },
+            },
+          },
+        })
+
+        return NextResponse.json({ productionLog })
+      }
+    }
+
+    // Normal update (no deferred deduction needed)
     const productionLog = await prisma.productionLog.update({
       where: { id },
       data: updateData,

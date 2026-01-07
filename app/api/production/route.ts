@@ -153,8 +153,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    // Fetch bakery to check stock deduction mode
+    const bakery = await prisma.bakery.findUnique({
+      where: { id: bakeryId },
+      select: { stockDeductionMode: true },
+    })
+
+    if (!bakery) {
+      return NextResponse.json({ error: 'Bakery not found' }, { status: 404 })
+    }
+
+    // Determine if we should deduct stock now based on bakery settings
+    const shouldDeductNow =
+      deductStock && bakery.stockDeductionMode === 'immediate'
+
     // If ingredient details provided, verify availability first
-    if (deductStock && ingredientDetails && ingredientDetails.length > 0) {
+    if (shouldDeductNow && ingredientDetails && ingredientDetails.length > 0) {
       const itemIds = ingredientDetails.map((ing) => ing.itemId)
       const inventoryItems = await prisma.inventoryItem.findMany({
         where: {
@@ -213,13 +227,15 @@ export async function POST(request: NextRequest) {
           preparationStatus: ProductionStatus.Planning,
           notes: notes || null,
           status: SubmissionStatus.Pending,
+          stockDeducted: shouldDeductNow,
+          stockDeductedAt: shouldDeductNow ? new Date() : null,
           createdBy: session.user.id,
           createdByName: session.user.name || session.user.email || undefined,
         },
       })
 
-      // If deductStock is true and we have ingredient details, create stock movements
-      if (deductStock && ingredientDetails && ingredientDetails.length > 0) {
+      // If shouldDeductNow is true and we have ingredient details, create stock movements
+      if (shouldDeductNow && ingredientDetails && ingredientDetails.length > 0) {
         for (const ingredient of ingredientDetails) {
           // Create stock movement (negative quantity for usage)
           await tx.stockMovement.create({

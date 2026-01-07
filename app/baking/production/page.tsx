@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { Plus, Utensils, Calendar, RefreshCw, ChevronDown, CheckCircle2 } from 'lucide-react'
+import { Plus, Utensils, Calendar, RefreshCw, ChevronDown, CheckCircle2, Search } from 'lucide-react'
 import { NavigationHeader } from '@/components/layout/NavigationHeader'
 import { useLocale } from '@/components/providers/LocaleProvider'
 import { useBakery } from '@/components/providers/BakeryProvider'
@@ -38,6 +38,11 @@ export default function BakingProductionPage() {
   const [productionLogs, setProductionLogs] = useState<ProductionLog[]>([])
   const [loadingLogs, setLoadingLogs] = useState(false)
   const [selectedDateRange, setSelectedDateRange] = useState<'today' | 'week' | 'month'>('today')
+
+  // Filters
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<ProductionStatus | 'all'>('all')
+  const [submissionFilter, setSubmissionFilter] = useState<SubmissionStatus | 'all'>('all')
 
   const isManager = session?.user?.role === 'Manager'
 
@@ -84,6 +89,29 @@ export default function BakingProductionPage() {
       setLoadingLogs(false)
     }
   }, [currentBakery, selectedDateRange])
+
+  // Filter production logs client-side
+  const filteredLogs = productionLogs.filter((log) => {
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      const nameMatch = log.productName.toLowerCase().includes(query)
+      const nameFrMatch = log.productNameFr?.toLowerCase().includes(query)
+      if (!nameMatch && !nameFrMatch) return false
+    }
+
+    // Status filter
+    if (statusFilter !== 'all' && log.preparationStatus !== statusFilter) {
+      return false
+    }
+
+    // Submission filter
+    if (submissionFilter !== 'all' && log.status !== submissionFilter) {
+      return false
+    }
+
+    return true
+  })
 
   useEffect(() => {
     if (currentBakery) {
@@ -194,58 +222,130 @@ export default function BakingProductionPage() {
 
         {/* Production History */}
         <div className="mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2
-              className="text-lg font-semibold text-terracotta-900 dark:text-cream-100"
-              style={{ fontFamily: "var(--font-poppins), 'Poppins', sans-serif" }}
-            >
-              {t('production.history') || 'Production History'}
-            </h2>
+          <div className="flex flex-col gap-4 mb-4">
+            <div className="flex items-center justify-between">
+              <h2
+                className="text-lg font-semibold text-terracotta-900 dark:text-cream-100"
+                style={{ fontFamily: "var(--font-poppins), 'Poppins', sans-serif" }}
+              >
+                {t('production.history') || 'Production History'}
+              </h2>
 
-            <div className="flex items-center gap-3">
-              {/* Date Range Filter */}
+              <div className="flex items-center gap-3">
+                {/* Date Range Filter */}
+                <div className="relative">
+                  <select
+                    value={selectedDateRange}
+                    onChange={(e) =>
+                      setSelectedDateRange(e.target.value as 'today' | 'week' | 'month')
+                    }
+                    className="
+                      appearance-none pl-3 pr-8 py-1.5
+                      text-sm rounded-lg
+                      border border-terracotta-200 dark:border-dark-600
+                      bg-cream-50 dark:bg-dark-800
+                      text-terracotta-900 dark:text-cream-100
+                      focus:ring-2 focus:ring-terracotta-500
+                    "
+                  >
+                    <option value="today">{t('common.today') || 'Today'}</option>
+                    <option value="week">{t('common.thisWeek') || 'This Week'}</option>
+                    <option value="month">{t('common.thisMonth') || 'This Month'}</option>
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-terracotta-400 pointer-events-none" />
+                </div>
+
+                {/* Refresh */}
+                <button
+                  onClick={fetchProductionLogs}
+                  disabled={loadingLogs}
+                  className="p-1.5 rounded-lg border border-terracotta-200 dark:border-dark-600 text-terracotta-600 dark:text-cream-300 hover:bg-cream-100 dark:hover:bg-dark-700 transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loadingLogs ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+            </div>
+
+            {/* Search and Filters Row */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              {/* Search */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-terracotta-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search products..."
+                  className="
+                    w-full pl-10 pr-4 py-2
+                    text-sm rounded-lg
+                    border border-terracotta-200 dark:border-dark-600
+                    bg-cream-50 dark:bg-dark-800
+                    text-terracotta-900 dark:text-cream-100
+                    placeholder:text-terracotta-400 dark:placeholder:text-cream-500
+                    focus:ring-2 focus:ring-terracotta-500
+                  "
+                />
+              </div>
+
+              {/* Status Filter */}
               <div className="relative">
                 <select
-                  value={selectedDateRange}
-                  onChange={(e) =>
-                    setSelectedDateRange(e.target.value as 'today' | 'week' | 'month')
-                  }
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as ProductionStatus | 'all')}
                   className="
-                    appearance-none pl-3 pr-8 py-1.5
+                    appearance-none pl-3 pr-8 py-2
                     text-sm rounded-lg
                     border border-terracotta-200 dark:border-dark-600
                     bg-cream-50 dark:bg-dark-800
                     text-terracotta-900 dark:text-cream-100
                     focus:ring-2 focus:ring-terracotta-500
+                    w-full sm:w-auto
                   "
                 >
-                  <option value="today">{t('common.today') || 'Today'}</option>
-                  <option value="week">{t('common.thisWeek') || 'This Week'}</option>
-                  <option value="month">{t('common.thisMonth') || 'This Month'}</option>
+                  <option value="all">{t('common.all')} Status</option>
+                  <option value="Planning">{t('production.statusPlanning')}</option>
+                  <option value="Ready">{t('production.statusReady')}</option>
+                  <option value="InProgress">{t('production.statusInProgress')}</option>
+                  <option value="Complete">{t('production.statusComplete')}</option>
                 </select>
                 <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-terracotta-400 pointer-events-none" />
               </div>
 
-              {/* Refresh */}
-              <button
-                onClick={fetchProductionLogs}
-                disabled={loadingLogs}
-                className="p-1.5 rounded-lg border border-terracotta-200 dark:border-dark-600 text-terracotta-600 dark:text-cream-300 hover:bg-cream-100 dark:hover:bg-dark-700 transition-colors disabled:opacity-50"
-              >
-                <RefreshCw className={`w-4 h-4 ${loadingLogs ? 'animate-spin' : ''}`} />
-              </button>
+              {/* Submission Filter */}
+              <div className="relative">
+                <select
+                  value={submissionFilter}
+                  onChange={(e) => setSubmissionFilter(e.target.value as SubmissionStatus | 'all')}
+                  className="
+                    appearance-none pl-3 pr-8 py-2
+                    text-sm rounded-lg
+                    border border-terracotta-200 dark:border-dark-600
+                    bg-cream-50 dark:bg-dark-800
+                    text-terracotta-900 dark:text-cream-100
+                    focus:ring-2 focus:ring-terracotta-500
+                    w-full sm:w-auto
+                  "
+                >
+                  <option value="all">{t('common.all')}</option>
+                  <option value="Pending">{t('common.pending')}</option>
+                  <option value="Approved">{t('common.approved')}</option>
+                  <option value="Rejected">{t('common.rejected')}</option>
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-terracotta-400 pointer-events-none" />
+              </div>
             </div>
           </div>
 
           {/* Production List */}
-          {loadingLogs && productionLogs.length === 0 ? (
+          {loadingLogs && filteredLogs.length === 0 ? (
             <div className="bg-cream-100 dark:bg-dark-800 rounded-2xl warm-shadow p-8 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-terracotta-500 mx-auto mb-4"></div>
               <p className="text-terracotta-600/60 dark:text-cream-300/60">
                 {t('common.loading') || 'Loading...'}
               </p>
             </div>
-          ) : productionLogs.length === 0 ? (
+          ) : filteredLogs.length === 0 ? (
             <div className="bg-cream-100 dark:bg-dark-800 rounded-2xl warm-shadow p-12 text-center grain-overlay">
               <Utensils className="w-12 h-12 mx-auto mb-4 text-terracotta-300 dark:text-dark-600" />
               <h3
@@ -292,10 +392,11 @@ export default function BakingProductionPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-terracotta-500/10 dark:divide-terracotta-400/10">
-                    {productionLogs.map((log) => (
+                    {filteredLogs.map((log) => (
                       <tr
                         key={log.id}
-                        className="hover:bg-cream-50 dark:hover:bg-dark-700/50 transition-colors"
+                        onClick={() => router.push(`/baking/production/${log.id}`)}
+                        className="hover:bg-cream-50 dark:hover:bg-dark-700/50 transition-colors cursor-pointer"
                       >
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
