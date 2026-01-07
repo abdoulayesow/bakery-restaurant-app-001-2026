@@ -140,6 +140,7 @@ model InventoryItem {
   expiryDays     Int?
   isActive       Boolean         @default(true)
   stockMovements StockMovement[]
+  expenseItems   ExpenseItem[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 
@@ -293,6 +294,7 @@ model Expense {
   supplier            Supplier?        @relation(fields: [supplierId], references: [id])
   isInventoryPurchase Boolean          @default(false)
   stockMovements      StockMovement[]
+  expenseItems        ExpenseItem[]
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
 
@@ -301,6 +303,20 @@ model Expense {
   @@index([status])
   @@index([categoryId])
   @@index([supplierId])
+}
+
+// Junction table for Expense <-> InventoryItem (many-to-many for inventory purchases)
+model ExpenseItem {
+  id              String        @id @default(uuid())
+  expenseId       String
+  expense         Expense       @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  inventoryItemId String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  quantity        Float
+  unitCostGNF     Float
+
+  @@index([expenseId])
+  @@index([inventoryItemId])
 }
 
 enum PaymentMethod {

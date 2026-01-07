@@ -92,7 +92,7 @@ export async function POST(
       },
     })
 
-    // If approved, update daily summary
+    // If approved, update daily summary and create stock movements for inventory purchases
     if (action === 'approve') {
       const expenseDate = new Date(expense.date)
       expenseDate.setHours(0, 0, 0, 0)
@@ -132,11 +132,51 @@ export async function POST(
           dailyCardExpenses: cardExpense,
         },
       })
+
+      // Create stock movements for inventory purchases
+      if (existingExpense.isInventoryPurchase) {
+        const expenseItems = await prisma.expenseItem.findMany({
+          where: { expenseId: expense.id },
+          include: { inventoryItem: true },
+        })
+
+        if (expenseItems.length > 0) {
+          // Create stock movements and update inventory in a transaction
+          await prisma.$transaction(async (tx) => {
+            for (const item of expenseItems) {
+              // Create Purchase stock movement
+              await tx.stockMovement.create({
+                data: {
+                  bakeryId: expense.bakeryId,
+                  itemId: item.inventoryItemId,
+                  type: 'Purchase',
+                  quantity: item.quantity,
+                  unitCost: item.unitCostGNF,
+                  reason: `Expense: ${expense.categoryName}`,
+                  expenseId: expense.id,
+                  createdBy: session.user.id,
+                  createdByName: session.user.name || session.user.email,
+                },
+              })
+
+              // Update inventory currentStock and unitCostGNF
+              await tx.inventoryItem.update({
+                where: { id: item.inventoryItemId },
+                data: {
+                  currentStock: { increment: item.quantity },
+                  unitCostGNF: item.unitCostGNF, // Update to latest cost
+                },
+              })
+            }
+          })
+        }
+      }
     }
 
     return NextResponse.json({
       expense,
       message: `Expense ${action === 'approve' ? 'approved' : 'rejected'} successfully`,
+      stockMovementsCreated: action === 'approve' && existingExpense.isInventoryPurchase,
     })
   } catch (error) {
     console.error('Error approving/rejecting expense:', error)

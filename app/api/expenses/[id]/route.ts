@@ -37,6 +37,18 @@ export async function GET(
             phone: true,
           },
         },
+        expenseItems: {
+          include: {
+            inventoryItem: {
+              select: {
+                id: true,
+                name: true,
+                nameFr: true,
+                unit: true,
+              },
+            },
+          },
+        },
       },
     })
 
@@ -124,6 +136,7 @@ export async function PUT(
       transactionRef,
       supplierId,
       isInventoryPurchase,
+      expenseItems, // Array of { inventoryItemId, quantity, unitCostGNF } or undefined to keep existing
     } = body
 
     // Validate payment method if provided
@@ -142,43 +155,113 @@ export async function PUT(
       )
     }
 
-    // Update expense
-    const expense = await prisma.expense.update({
-      where: { id },
-      data: {
-        categoryId: categoryId !== undefined ? (categoryId || null) : existingExpense.categoryId,
-        categoryName: categoryName !== undefined ? categoryName : existingExpense.categoryName,
-        amountGNF: amountGNF !== undefined ? amountGNF : existingExpense.amountGNF,
-        amountEUR: amountEUR !== undefined ? amountEUR : existingExpense.amountEUR,
-        paymentMethod: paymentMethod !== undefined ? paymentMethod : existingExpense.paymentMethod,
-        description: description !== undefined ? (description || null) : existingExpense.description,
-        receiptUrl: receiptUrl !== undefined ? (receiptUrl || null) : existingExpense.receiptUrl,
-        comments: comments !== undefined ? (comments || null) : existingExpense.comments,
-        transactionRef: transactionRef !== undefined ? (transactionRef || null) : existingExpense.transactionRef,
-        supplierId: supplierId !== undefined ? (supplierId || null) : existingExpense.supplierId,
-        isInventoryPurchase: isInventoryPurchase !== undefined ? isInventoryPurchase : existingExpense.isInventoryPurchase,
-        // If a non-manager edits, reset to Pending for re-approval
-        status: !isManager && existingExpense.status === 'Pending' ? 'Pending' : existingExpense.status,
-        lastModifiedBy: session.user.id,
-        lastModifiedByName: session.user.name || session.user.email,
-        lastModifiedAt: new Date(),
-      },
-      include: {
-        category: {
-          select: {
-            id: true,
-            name: true,
-            nameFr: true,
-            color: true,
+    // Determine final isInventoryPurchase value
+    const finalIsInventoryPurchase = isInventoryPurchase !== undefined ? isInventoryPurchase : existingExpense.isInventoryPurchase
+
+    // Validate expense items if provided
+    if (expenseItems !== undefined && finalIsInventoryPurchase && expenseItems.length > 0) {
+      const inventoryItemIds = expenseItems.map((item: { inventoryItemId: string }) => item.inventoryItemId)
+      const validItems = await prisma.inventoryItem.findMany({
+        where: {
+          id: { in: inventoryItemIds },
+          bakeryId: existingExpense.bakeryId,
+          isActive: true,
+        },
+        select: { id: true },
+      })
+
+      if (validItems.length !== inventoryItemIds.length) {
+        return NextResponse.json(
+          { error: 'One or more inventory items are invalid or do not belong to this bakery' },
+          { status: 400 }
+        )
+      }
+
+      for (const item of expenseItems) {
+        if (!item.quantity || item.quantity <= 0) {
+          return NextResponse.json({ error: 'Each item must have a quantity greater than 0' }, { status: 400 })
+        }
+        if (item.unitCostGNF === undefined || item.unitCostGNF < 0) {
+          return NextResponse.json({ error: 'Each item must have a valid unit cost' }, { status: 400 })
+        }
+      }
+    }
+
+    // Update expense with items in a transaction
+    const expense = await prisma.$transaction(async (tx) => {
+      // Update expense
+      await tx.expense.update({
+        where: { id },
+        data: {
+          categoryId: categoryId !== undefined ? (categoryId || null) : existingExpense.categoryId,
+          categoryName: categoryName !== undefined ? categoryName : existingExpense.categoryName,
+          amountGNF: amountGNF !== undefined ? amountGNF : existingExpense.amountGNF,
+          amountEUR: amountEUR !== undefined ? amountEUR : existingExpense.amountEUR,
+          paymentMethod: paymentMethod !== undefined ? paymentMethod : existingExpense.paymentMethod,
+          description: description !== undefined ? (description || null) : existingExpense.description,
+          receiptUrl: receiptUrl !== undefined ? (receiptUrl || null) : existingExpense.receiptUrl,
+          comments: comments !== undefined ? (comments || null) : existingExpense.comments,
+          transactionRef: transactionRef !== undefined ? (transactionRef || null) : existingExpense.transactionRef,
+          supplierId: supplierId !== undefined ? (supplierId || null) : existingExpense.supplierId,
+          isInventoryPurchase: finalIsInventoryPurchase,
+          // If a non-manager edits, reset to Pending for re-approval
+          status: !isManager && existingExpense.status === 'Pending' ? 'Pending' : existingExpense.status,
+          lastModifiedBy: session.user.id,
+          lastModifiedByName: session.user.name || session.user.email,
+          lastModifiedAt: new Date(),
+        },
+      })
+
+      // Update expense items if provided
+      if (expenseItems !== undefined) {
+        // Delete existing items
+        await tx.expenseItem.deleteMany({ where: { expenseId: id } })
+
+        // Create new items if inventory purchase
+        if (finalIsInventoryPurchase && expenseItems.length > 0) {
+          await tx.expenseItem.createMany({
+            data: expenseItems.map((item: { inventoryItemId: string; quantity: number; unitCostGNF: number }) => ({
+              expenseId: id,
+              inventoryItemId: item.inventoryItemId,
+              quantity: item.quantity,
+              unitCostGNF: item.unitCostGNF,
+            })),
+          })
+        }
+      }
+
+      // Fetch complete expense with relations
+      return tx.expense.findUnique({
+        where: { id },
+        include: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              nameFr: true,
+              color: true,
+            },
+          },
+          supplier: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          expenseItems: {
+            include: {
+              inventoryItem: {
+                select: {
+                  id: true,
+                  name: true,
+                  nameFr: true,
+                  unit: true,
+                },
+              },
+            },
           },
         },
-        supplier: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
+      })
     })
 
     return NextResponse.json({ expense })

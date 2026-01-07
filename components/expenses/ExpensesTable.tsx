@@ -16,6 +16,17 @@ interface Expense {
   submittedByName?: string | null
   supplier?: { id: string; name: string } | null
   isInventoryPurchase: boolean
+  expenseItems?: Array<{
+    inventoryItemId: string
+    quantity: number
+    unitCostGNF: number
+    inventoryItem?: {
+      id: string
+      name: string
+      nameFr?: string | null
+      unit: string
+    }
+  }>
 }
 
 interface ExpensesTableProps {
@@ -211,7 +222,10 @@ export function ExpensesTable({
                     </span>
                     {expense.isInventoryPurchase && (
                       <span className="px-1.5 py-0.5 text-xs rounded bg-green-500/10 text-green-700 dark:text-green-400">
-                        {t('expenses.inventory') || 'Inv'}
+                        {expense.expenseItems && expense.expenseItems.length > 0
+                          ? `${expense.expenseItems.length} ${t('expenses.items') || 'items'}`
+                          : (t('expenses.inventory') || 'Inv')
+                        }
                       </span>
                     )}
                   </div>

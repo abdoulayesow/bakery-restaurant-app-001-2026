@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Calendar, DollarSign, Smartphone, CreditCard, FileText, Tag, Building2, Package } from 'lucide-react'
+import { X, Calendar, DollarSign, Smartphone, CreditCard, FileText, Tag, Building2, Package, Plus, Trash2 } from 'lucide-react'
 import { useLocale } from '@/components/providers/LocaleProvider'
 
 interface Category {
@@ -22,6 +22,20 @@ interface Supplier {
   phone?: string | null
 }
 
+interface InventoryItem {
+  id: string
+  name: string
+  nameFr?: string | null
+  unit: string
+  unitCostGNF: number
+}
+
+interface ExpenseItemInput {
+  inventoryItemId: string
+  quantity: number
+  unitCostGNF: number
+}
+
 interface Expense {
   id?: string
   date: string
@@ -35,15 +49,27 @@ interface Expense {
   isInventoryPurchase?: boolean
   comments?: string | null
   status?: 'Pending' | 'Approved' | 'Rejected'
+  expenseItems?: Array<{
+    inventoryItemId: string
+    quantity: number
+    unitCostGNF: number
+    inventoryItem?: {
+      id: string
+      name: string
+      nameFr?: string | null
+      unit: string
+    }
+  }>
 }
 
 interface AddEditExpenseModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (expense: Partial<Expense>) => void
+  onSave: (expense: Partial<Expense> & { expenseItems?: ExpenseItemInput[] }) => void
   expense?: Expense | null
   categories: Category[]
   suppliers: Supplier[]
+  inventoryItems?: InventoryItem[]
   loading?: boolean
 }
 
@@ -54,6 +80,7 @@ export function AddEditExpenseModal({
   expense,
   categories,
   suppliers,
+  inventoryItems = [],
   loading = false,
 }: AddEditExpenseModalProps) {
   const { t, locale } = useLocale()
@@ -72,6 +99,7 @@ export function AddEditExpenseModal({
     comments: '',
   })
 
+  const [expenseItems, setExpenseItems] = useState<ExpenseItemInput[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Initialize form with expense data
@@ -89,6 +117,16 @@ export function AddEditExpenseModal({
         isInventoryPurchase: expense.isInventoryPurchase || false,
         comments: expense.comments || '',
       })
+      // Initialize expense items if editing
+      if (expense.expenseItems && expense.expenseItems.length > 0) {
+        setExpenseItems(expense.expenseItems.map(item => ({
+          inventoryItemId: item.inventoryItemId,
+          quantity: item.quantity,
+          unitCostGNF: item.unitCostGNF,
+        })))
+      } else {
+        setExpenseItems([])
+      }
     } else {
       // Default to today for new expenses
       setFormData({
@@ -103,6 +141,7 @@ export function AddEditExpenseModal({
         isInventoryPurchase: false,
         comments: '',
       })
+      setExpenseItems([])
     }
     setErrors({})
   }, [expense, isOpen])
@@ -122,6 +161,46 @@ export function AddEditExpenseModal({
       return category.nameFr
     }
     return category.name
+  }
+
+  // Get inventory item display name based on locale
+  const getInventoryItemDisplayName = (item: InventoryItem) => {
+    if (locale === 'fr' && item.nameFr) {
+      return item.nameFr
+    }
+    return item.name
+  }
+
+  // Add expense item
+  const addExpenseItem = () => {
+    setExpenseItems(prev => [...prev, { inventoryItemId: '', quantity: 1, unitCostGNF: 0 }])
+  }
+
+  // Remove expense item
+  const removeExpenseItem = (index: number) => {
+    setExpenseItems(prev => prev.filter((_, i) => i !== index))
+  }
+
+  // Update expense item
+  const updateExpenseItem = (index: number, field: keyof ExpenseItemInput, value: string | number) => {
+    setExpenseItems(prev => prev.map((item, i) => {
+      if (i !== index) return item
+      if (field === 'inventoryItemId') {
+        // When item is selected, pre-fill unit cost from inventory
+        const invItem = inventoryItems.find(inv => inv.id === value)
+        return {
+          ...item,
+          inventoryItemId: value as string,
+          unitCostGNF: invItem?.unitCostGNF || item.unitCostGNF,
+        }
+      }
+      return { ...item, [field]: value }
+    }))
+  }
+
+  // Calculate total from expense items
+  const calculateItemsTotal = () => {
+    return expenseItems.reduce((sum, item) => sum + (item.quantity * item.unitCostGNF), 0)
   }
 
   // Handle input change
@@ -179,6 +258,20 @@ export function AddEditExpenseModal({
       newErrors.paymentMethod = t('validation.required') || 'Required'
     }
 
+    // Validate expense items for inventory purchases
+    if (formData.isInventoryPurchase && expenseItems.length === 0) {
+      newErrors.expenseItems = t('expenses.itemsRequired') || 'At least one inventory item is required'
+    }
+
+    if (formData.isInventoryPurchase && expenseItems.length > 0) {
+      const hasInvalidItem = expenseItems.some(item =>
+        !item.inventoryItemId || item.quantity <= 0 || item.unitCostGNF < 0
+      )
+      if (hasInvalidItem) {
+        newErrors.expenseItems = t('expenses.invalidItems') || 'All items must have valid selection, quantity, and cost'
+      }
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -201,6 +294,8 @@ export function AddEditExpenseModal({
       supplierId: formData.supplierId || null,
       isInventoryPurchase: formData.isInventoryPurchase,
       comments: formData.comments || null,
+      // Include expense items if inventory purchase
+      expenseItems: formData.isInventoryPurchase ? expenseItems : [],
     })
   }
 
@@ -468,6 +563,117 @@ export function AddEditExpenseModal({
                   </div>
                 </label>
               </div>
+
+              {/* Inventory Items Section - Only show when isInventoryPurchase is checked */}
+              {formData.isInventoryPurchase && (
+                <div className="space-y-3 p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-green-800 dark:text-green-200 flex items-center gap-2">
+                      <Package className="w-4 h-4" />
+                      {t('expenses.inventoryItems') || 'Inventory Items'}
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={addExpenseItem}
+                      className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-800/50 rounded-lg hover:bg-green-200 dark:hover:bg-green-800 transition-colors"
+                    >
+                      <Plus className="w-3 h-3" />
+                      {t('expenses.addItem') || 'Add Item'}
+                    </button>
+                  </div>
+
+                  {expenseItems.length === 0 ? (
+                    <p className="text-sm text-green-700/70 dark:text-green-300/70 text-center py-4">
+                      {t('expenses.noItemsAdded') || 'No items added yet. Click "Add Item" to add inventory items.'}
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {expenseItems.map((item, index) => {
+                        const selectedItem = inventoryItems.find(inv => inv.id === item.inventoryItemId)
+                        return (
+                          <div key={index} className="flex gap-2 items-start bg-white dark:bg-dark-800 p-3 rounded-lg">
+                            <div className="flex-1 space-y-2">
+                              {/* Item Select */}
+                              <select
+                                value={item.inventoryItemId}
+                                onChange={(e) => updateExpenseItem(index, 'inventoryItemId', e.target.value)}
+                                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-dark-600 bg-cream-50 dark:bg-dark-700 text-terracotta-900 dark:text-cream-100 focus:ring-2 focus:ring-green-500"
+                              >
+                                <option value="">{t('expenses.selectItem') || 'Select item...'}</option>
+                                {inventoryItems.map(inv => (
+                                  <option key={inv.id} value={inv.id}>
+                                    {getInventoryItemDisplayName(inv)} ({inv.unit})
+                                  </option>
+                                ))}
+                              </select>
+                              {/* Quantity and Unit Cost */}
+                              <div className="flex gap-2">
+                                <div className="flex-1">
+                                  <label className="text-xs text-gray-600 dark:text-gray-400">
+                                    {t('expenses.quantity') || 'Qty'} {selectedItem && `(${selectedItem.unit})`}
+                                  </label>
+                                  <input
+                                    type="number"
+                                    value={item.quantity || ''}
+                                    onChange={(e) => updateExpenseItem(index, 'quantity', parseFloat(e.target.value) || 0)}
+                                    min="0.01"
+                                    step="0.01"
+                                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-dark-600 bg-cream-50 dark:bg-dark-700 text-terracotta-900 dark:text-cream-100 focus:ring-2 focus:ring-green-500"
+                                    placeholder="0"
+                                  />
+                                </div>
+                                <div className="flex-1">
+                                  <label className="text-xs text-gray-600 dark:text-gray-400">
+                                    {t('expenses.unitCost') || 'Unit Cost'} (GNF)
+                                  </label>
+                                  <input
+                                    type="number"
+                                    value={item.unitCostGNF || ''}
+                                    onChange={(e) => updateExpenseItem(index, 'unitCostGNF', parseFloat(e.target.value) || 0)}
+                                    min="0"
+                                    className="w-full px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-dark-600 bg-cream-50 dark:bg-dark-700 text-terracotta-900 dark:text-cream-100 focus:ring-2 focus:ring-green-500"
+                                    placeholder="0"
+                                  />
+                                </div>
+                              </div>
+                              {/* Line Total */}
+                              {item.quantity > 0 && item.unitCostGNF > 0 && (
+                                <p className="text-xs text-green-700 dark:text-green-400">
+                                  = {formatCurrency(item.quantity * item.unitCostGNF)}
+                                </p>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeExpenseItem(index)}
+                              className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                              aria-label={t('common.remove') || 'Remove'}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {/* Items Total */}
+                  {expenseItems.length > 0 && (
+                    <div className="flex justify-between items-center pt-2 border-t border-green-200 dark:border-green-800">
+                      <span className="text-sm font-medium text-green-800 dark:text-green-200">
+                        {t('expenses.itemsTotal') || 'Items Total'}:
+                      </span>
+                      <span className="text-sm font-bold text-green-700 dark:text-green-300">
+                        {formatCurrency(calculateItemsTotal())}
+                      </span>
+                    </div>
+                  )}
+
+                  {errors.expenseItems && (
+                    <p className="text-sm text-red-500">{errors.expenseItems}</p>
+                  )}
+                </div>
+              )}
 
               {/* Comments */}
               <div>

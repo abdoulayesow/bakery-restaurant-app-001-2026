@@ -22,6 +22,17 @@ interface Expense {
   submittedByName?: string | null
   supplier?: { id: string; name: string } | null
   isInventoryPurchase: boolean
+  expenseItems?: Array<{
+    inventoryItemId: string
+    quantity: number
+    unitCostGNF: number
+    inventoryItem?: {
+      id: string
+      name: string
+      nameFr?: string | null
+      unit: string
+    }
+  }>
 }
 
 interface Category {
@@ -40,6 +51,14 @@ interface Supplier {
   id: string
   name: string
   phone?: string | null
+}
+
+interface InventoryItem {
+  id: string
+  name: string
+  nameFr?: string | null
+  unit: string
+  unitCostGNF: number
 }
 
 interface ExpensesSummary {
@@ -62,6 +81,7 @@ export default function ExpensesPage() {
   const [summary, setSummary] = useState<ExpensesSummary | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([])
   const [statusFilter, setStatusFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -104,6 +124,20 @@ export default function ExpensesPage() {
     }
   }, [])
 
+  // Fetch inventory items
+  const fetchInventoryItems = useCallback(async () => {
+    if (!currentBakery?.id) return
+    try {
+      const res = await fetch(`/api/inventory?bakeryId=${currentBakery.id}`)
+      if (res.ok) {
+        const data = await res.json()
+        setInventoryItems(data.items || [])
+      }
+    } catch (error) {
+      console.error('Error fetching inventory items:', error)
+    }
+  }, [currentBakery?.id])
+
   // Fetch expenses
   const fetchExpenses = useCallback(async () => {
     if (!currentBakery?.id) return
@@ -135,8 +169,9 @@ export default function ExpensesPage() {
       fetchExpenses()
       fetchCategories()
       fetchSuppliers()
+      fetchInventoryItems()
     }
-  }, [currentBakery?.id, fetchExpenses, fetchCategories, fetchSuppliers])
+  }, [currentBakery?.id, fetchExpenses, fetchCategories, fetchSuppliers, fetchInventoryItems])
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -438,6 +473,7 @@ export default function ExpensesPage() {
         expense={selectedExpense}
         categories={categories}
         suppliers={suppliers}
+        inventoryItems={inventoryItems}
         loading={isSaving}
       />
     </div>
