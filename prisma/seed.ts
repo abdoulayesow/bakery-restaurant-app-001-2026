@@ -290,6 +290,88 @@ async function main() {
   })
   console.log('✅ Created sample stock movement')
 
+  // Create expense groups
+  const expenseGroups = [
+    { id: 'exp-group-ingredients', key: 'ingredients', label: 'Ingredients', labelFr: 'Ingrédients', icon: 'Package', color: '#22c55e', sortOrder: 1 },
+    { id: 'exp-group-utilities', key: 'utilities', label: 'Utilities', labelFr: 'Fournitures', icon: 'Zap', color: '#3b82f6', sortOrder: 2 },
+    { id: 'exp-group-salaries', key: 'salaries', label: 'Salaries', labelFr: 'Salaires', icon: 'Users', color: '#a855f7', sortOrder: 3 },
+    { id: 'exp-group-maintenance', key: 'maintenance', label: 'Maintenance', labelFr: 'Entretien', icon: 'Wrench', color: '#f97316', sortOrder: 4 },
+    { id: 'exp-group-rent', key: 'rent', label: 'Rent', labelFr: 'Loyer', icon: 'Building2', color: '#06b6d4', sortOrder: 5 },
+    { id: 'exp-group-marketing', key: 'marketing', label: 'Marketing', labelFr: 'Marketing', icon: 'Megaphone', color: '#ec4899', sortOrder: 6 },
+    { id: 'exp-group-other', key: 'other', label: 'Other', labelFr: 'Autres', icon: 'MoreHorizontal', color: '#6b7280', sortOrder: 7 },
+  ]
+
+  for (const group of expenseGroups) {
+    await prisma.expenseGroup.upsert({
+      where: { key: group.key },
+      update: {},
+      create: group,
+    })
+  }
+  console.log(`✅ Created ${expenseGroups.length} expense groups`)
+
+  // Create expense categories
+  const categories = [
+    // Ingredients
+    { id: 'cat-flour', name: 'Flour', nameFr: 'Farine', color: '#22c55e', expenseGroupKey: 'ingredients' },
+    { id: 'cat-sugar', name: 'Sugar', nameFr: 'Sucre', color: '#22c55e', expenseGroupKey: 'ingredients' },
+    { id: 'cat-butter', name: 'Butter', nameFr: 'Beurre', color: '#22c55e', expenseGroupKey: 'ingredients' },
+    { id: 'cat-eggs', name: 'Eggs', nameFr: 'Oeufs', color: '#22c55e', expenseGroupKey: 'ingredients' },
+    { id: 'cat-other-ingredients', name: 'Other Ingredients', nameFr: 'Autres ingrédients', color: '#22c55e', expenseGroupKey: 'ingredients' },
+    // Utilities
+    { id: 'cat-electricity', name: 'Electricity', nameFr: 'Électricité', color: '#3b82f6', expenseGroupKey: 'utilities' },
+    { id: 'cat-water', name: 'Water', nameFr: 'Eau', color: '#3b82f6', expenseGroupKey: 'utilities' },
+    { id: 'cat-gas', name: 'Gas', nameFr: 'Gaz', color: '#3b82f6', expenseGroupKey: 'utilities' },
+    { id: 'cat-internet', name: 'Internet', nameFr: 'Internet', color: '#3b82f6', expenseGroupKey: 'utilities' },
+    // Salaries
+    { id: 'cat-staff-salaries', name: 'Staff Salaries', nameFr: 'Salaires du personnel', color: '#a855f7', expenseGroupKey: 'salaries' },
+    { id: 'cat-bonuses', name: 'Bonuses', nameFr: 'Primes', color: '#a855f7', expenseGroupKey: 'salaries' },
+    // Maintenance
+    { id: 'cat-equipment-repair', name: 'Equipment Repair', nameFr: 'Réparation équipement', color: '#f97316', expenseGroupKey: 'maintenance' },
+    { id: 'cat-cleaning', name: 'Cleaning Supplies', nameFr: 'Produits de nettoyage', color: '#f97316', expenseGroupKey: 'maintenance' },
+    // Rent
+    { id: 'cat-monthly-rent', name: 'Monthly Rent', nameFr: 'Loyer mensuel', color: '#06b6d4', expenseGroupKey: 'rent' },
+    // Marketing
+    { id: 'cat-advertising', name: 'Advertising', nameFr: 'Publicité', color: '#ec4899', expenseGroupKey: 'marketing' },
+    { id: 'cat-promotions', name: 'Promotions', nameFr: 'Promotions', color: '#ec4899', expenseGroupKey: 'marketing' },
+    // Other
+    { id: 'cat-miscellaneous', name: 'Miscellaneous', nameFr: 'Divers', color: '#6b7280', expenseGroupKey: 'other' },
+  ]
+
+  for (const cat of categories) {
+    const group = await prisma.expenseGroup.findUnique({ where: { key: cat.expenseGroupKey } })
+    await prisma.category.upsert({
+      where: { name: cat.name },
+      update: {},
+      create: {
+        id: cat.id,
+        name: cat.name,
+        nameFr: cat.nameFr,
+        color: cat.color,
+        expenseGroupId: group?.id,
+      },
+    })
+  }
+  console.log(`✅ Created ${categories.length} expense categories`)
+
+  // Create suppliers
+  const suppliers = [
+    { id: 'sup-moulin', name: 'Moulin de Conakry', phone: '+224 622 11 11 11', email: 'contact@moulin-conakry.gn', address: 'Conakry, Centre-ville' },
+    { id: 'sup-laiterie', name: 'Laiterie Nationale', phone: '+224 622 22 22 22', email: 'ventes@laiterie.gn', address: 'Conakry, Zone Industrielle' },
+    { id: 'sup-emballages', name: 'Emballages Plus', phone: '+224 622 33 33 33', email: 'commandes@emballages.gn', address: 'Conakry, Matoto' },
+    { id: 'sup-edg', name: 'Electricité de Guinée', phone: '+224 622 44 44 44', email: null, address: 'Conakry' },
+    { id: 'sup-sotelgui', name: 'SOTELGUI', phone: '+224 622 55 55 55', email: null, address: 'Conakry' },
+  ]
+
+  for (const sup of suppliers) {
+    await prisma.supplier.upsert({
+      where: { name: sup.name },
+      update: {},
+      create: sup,
+    })
+  }
+  console.log(`✅ Created ${suppliers.length} suppliers`)
+
   console.log('')
   console.log('🎉 Seed completed successfully!')
   console.log('')
