@@ -39,35 +39,35 @@ model Session {
 }
 
 model User {
-  id               String       @id @default(uuid())
-  email            String       @unique
-  name             String?
-  image            String?
-  emailVerified    DateTime?    // Required by NextAuth Prisma Adapter
-  role             UserRole     @default(Editor)
-  phone            String?
-  address          String?
-  defaultBakeryId  String?      // User's preferred/default bakery
-  defaultBakery    Bakery?      @relation("DefaultBakery", fields: [defaultBakeryId], references: [id])
-  bakeries         UserBakery[] // Bakeries this user can access
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-  accounts         Account[]
-  sessions         Session[]
+  id                  String           @id @default(uuid())
+  email               String           @unique
+  name                String?
+  image               String?
+  emailVerified       DateTime?        // Required by NextAuth Prisma Adapter
+  role                UserRole         @default(Editor)
+  phone               String?
+  address             String?
+  defaultRestaurantId String?          // User's preferred/default restaurant
+  defaultRestaurant   Restaurant?      @relation("DefaultRestaurant", fields: [defaultRestaurantId], references: [id])
+  restaurants         UserRestaurant[] // Restaurants this user can access
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  accounts            Account[]
+  sessions            Session[]
 }
 
-// Junction table for User <-> Bakery (many-to-many)
-model UserBakery {
-  id        String   @id @default(uuid())
-  userId    String
-  bakeryId  String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bakery    Bakery   @relation(fields: [bakeryId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+// Junction table for User <-> Restaurant (many-to-many)
+model UserRestaurant {
+  id           String     @id @default(uuid())
+  userId       String
+  restaurantId String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
 
-  @@unique([userId, bakeryId])
+  @@unique([userId, restaurantId])
   @@index([userId])
-  @@index([bakeryId])
+  @@index([restaurantId])
 }
 
 model VerificationToken {
@@ -83,32 +83,42 @@ enum UserRole {
   Manager
 }
 
+enum RestaurantType {
+  Bakery
+  Cafe
+  Restaurant
+  FastFood
+}
+
 // ============================================================================
-// BAKERY (Multi-location support)
+// RESTAURANT (Multi-location support)
 // ============================================================================
 
-model Bakery {
-  id                   String          @id @default(uuid())
+model Restaurant {
+  id                   String           @id @default(uuid())
   name                 String
-  location             String?         // e.g., "Conakry - Centre", "Conakry - Kaloum"
+  restaurantType       RestaurantType   @default(Bakery)
+  inventoryEnabled     Boolean          @default(true)
+  productionEnabled    Boolean          @default(true)
+  location             String?          // e.g., "Conakry - Centre", "Conakry - Kaloum"
   openingDate          DateTime?
-  initialCapital       Float           @default(0)
-  initialCashBalance   Float           @default(0)
-  initialOrangeBalance Float           @default(0)
-  initialCardBalance   Float           @default(0)
+  initialCapital       Float            @default(0)
+  initialCashBalance   Float            @default(0)
+  initialOrangeBalance Float            @default(0)
+  initialCardBalance   Float            @default(0)
   contactPhone         String?
   contactEmail         String?
   managerName          String?
-  currency             String          @default("GNF")
+  currency             String           @default("GNF")
   trackingStartDate    DateTime?
-  stockDeductionMode   String          @default("immediate") // "immediate" | "deferred"
-  isActive             Boolean         @default(true)
-  createdAt            DateTime        @default(now())
-  updatedAt            DateTime        @updatedAt
+  stockDeductionMode   String           @default("immediate") // "immediate" | "deferred"
+  isActive             Boolean          @default(true)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
 
   // Relations
-  users                UserBakery[]
-  defaultForUsers      User[]          @relation("DefaultBakery")
+  users                UserRestaurant[]
+  defaultForUsers      User[]           @relation("DefaultRestaurant")
   inventoryItems       InventoryItem[]
   stockMovements       StockMovement[]
   productionLogs       ProductionLog[]
@@ -116,8 +126,10 @@ model Bakery {
   expenses             Expense[]
   cashDeposits         CashDeposit[]
   dailySummaries       DailySummary[]
+  paymentMethods       PaymentMethod[]
 
   @@index([isActive])
+  @@index([restaurantType])
 }
 
 // ============================================================================
@@ -126,8 +138,8 @@ model Bakery {
 
 model InventoryItem {
   id             String          @id @default(uuid())
-  bakeryId       String
-  bakery         Bakery          @relation(fields: [bakeryId], references: [id])
+  restaurantId   String
+  restaurant     Restaurant      @relation(fields: [restaurantId], references: [id])
   name           String
   nameFr         String?
   category       String
@@ -145,7 +157,7 @@ model InventoryItem {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 
-  @@index([bakeryId])
+  @@index([restaurantId])
   @@index([category])
   @@index([supplierId])
   @@index([isActive])
@@ -153,8 +165,8 @@ model InventoryItem {
 
 model StockMovement {
   id              String         @id @default(uuid())
-  bakeryId        String
-  bakery          Bakery         @relation(fields: [bakeryId], references: [id])
+  restaurantId    String
+  restaurant      Restaurant     @relation(fields: [restaurantId], references: [id])
   itemId          String
   item            InventoryItem  @relation(fields: [itemId], references: [id])
   type            MovementType
@@ -169,7 +181,7 @@ model StockMovement {
   createdByName   String?
   createdAt       DateTime       @default(now())
 
-  @@index([bakeryId])
+  @@index([restaurantId])
   @@index([itemId])
   @@index([type])
   @@index([createdAt])
@@ -188,8 +200,8 @@ enum MovementType {
 
 model ProductionLog {
   id                  String            @id @default(uuid())
-  bakeryId            String
-  bakery              Bakery            @relation(fields: [bakeryId], references: [id])
+  restaurantId        String
+  restaurant          Restaurant        @relation(fields: [restaurantId], references: [id])
   date                DateTime
   productName         String
   productNameFr       String?
@@ -208,7 +220,7 @@ model ProductionLog {
   updatedAt           DateTime          @updatedAt
   stockMovements      StockMovement[]
 
-  @@index([bakeryId])
+  @@index([restaurantId])
   @@index([date])
   @@index([status])
   @@index([preparationStatus])
@@ -227,8 +239,8 @@ enum ProductionStatus {
 
 model Sale {
   id                 String           @id @default(uuid())
-  bakeryId           String
-  bakery             Bakery           @relation(fields: [bakeryId], references: [id])
+  restaurantId       String
+  restaurant         Restaurant       @relation(fields: [restaurantId], references: [id])
   date               DateTime
   totalGNF           Float
   totalEUR           Float            @default(0)
@@ -253,8 +265,8 @@ model Sale {
   updatedAt          DateTime         @updatedAt
   cashDeposit        CashDeposit?
 
-  @@unique([bakeryId, date]) // One sale per bakery per day
-  @@index([bakeryId])
+  @@unique([restaurantId, date]) // One sale per restaurant per day
+  @@index([restaurantId])
   @@index([date])
   @@index([status])
 }
@@ -271,15 +283,15 @@ enum SubmissionStatus {
 
 model Expense {
   id                  String           @id @default(uuid())
-  bakeryId            String
-  bakery              Bakery           @relation(fields: [bakeryId], references: [id])
+  restaurantId        String
+  restaurant          Restaurant       @relation(fields: [restaurantId], references: [id])
   date                DateTime
   categoryId          String?
   category            Category?        @relation(fields: [categoryId], references: [id])
   categoryName        String
   amountGNF           Float
   amountEUR           Float            @default(0)
-  paymentMethod       PaymentMethod
+  paymentMethod       String           // Payment method name (instead of enum)
   description         String?
   receiptUrl          String?
   comments            String?
@@ -301,7 +313,7 @@ model Expense {
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
 
-  @@index([bakeryId])
+  @@index([restaurantId])
   @@index([date])
   @@index([status])
   @@index([categoryId])
@@ -322,14 +334,27 @@ model ExpenseItem {
   @@index([inventoryItemId])
 }
 
-enum PaymentMethod {
-  Cash
-  OrangeMoney
-  Card
+// Payment methods are now configurable per restaurant
+model PaymentMethod {
+  id           String     @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  name         String     // "Cash", "Orange Money", "Card", etc.
+  nameFr       String?    // French translation
+  type         String     // "cash", "mobile_money", "card", "bank_transfer"
+  icon         String     @default("Wallet") // Lucide icon name
+  color        String     @default("#C45C26")
+  isActive     Boolean    @default(true)
+  sortOrder    Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([restaurantId, name])
+  @@index([restaurantId, isActive])
 }
 
 // ============================================================================
-// CATEGORIES & SUPPLIERS (Shared across bakeries)
+// CATEGORIES & SUPPLIERS (Shared across restaurants)
 // ============================================================================
 
 model Category {
@@ -391,8 +416,8 @@ model CategorySupplier {
 
 model CashDeposit {
   id              String            @id @default(uuid())
-  bakeryId        String
-  bakery          Bakery            @relation(fields: [bakeryId], references: [id])
+  restaurantId    String
+  restaurant      Restaurant        @relation(fields: [restaurantId], references: [id])
   date            DateTime
   amount          Float
   status          CashDepositStatus @default(Pending)
@@ -407,7 +432,7 @@ model CashDeposit {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
-  @@index([bakeryId])
+  @@index([restaurantId])
   @@index([date])
   @@index([status])
 }
@@ -418,30 +443,30 @@ enum CashDepositStatus {
 }
 
 // ============================================================================
-// DAILY SUMMARY (Per Bakery)
+// DAILY SUMMARY (Per Restaurant)
 // ============================================================================
 
 model DailySummary {
-  id                      String   @id @default(uuid())
-  bakeryId                String
-  bakery                  Bakery   @relation(fields: [bakeryId], references: [id])
+  id                      String     @id @default(uuid())
+  restaurantId            String
+  restaurant              Restaurant @relation(fields: [restaurantId], references: [id])
   date                    DateTime
-  dailyCashSales          Float    @default(0)
-  dailyOrangeSales        Float    @default(0)
-  dailyCardSales          Float    @default(0)
-  dailyCashExpenses       Float    @default(0)
-  dailyOrangeExpenses     Float    @default(0)
-  dailyCardExpenses       Float    @default(0)
-  cumulativeCashBalance   Float    @default(0)
-  cumulativeOrangeBalance Float    @default(0)
-  cumulativeCardBalance   Float    @default(0)
-  lowStockItemsCount      Int      @default(0)
-  criticalStockItemsCount Int      @default(0)
-  totalInventoryValueGNF  Float    @default(0)
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  dailyCashSales          Float      @default(0)
+  dailyOrangeSales        Float      @default(0)
+  dailyCardSales          Float      @default(0)
+  dailyCashExpenses       Float      @default(0)
+  dailyOrangeExpenses     Float      @default(0)
+  dailyCardExpenses       Float      @default(0)
+  cumulativeCashBalance   Float      @default(0)
+  cumulativeOrangeBalance Float      @default(0)
+  cumulativeCardBalance   Float      @default(0)
+  lowStockItemsCount      Int        @default(0)
+  criticalStockItemsCount Int        @default(0)
+  totalInventoryValueGNF  Float      @default(0)
+  createdAt               DateTime   @default(now())
+  updatedAt               DateTime   @updatedAt
 
-  @@unique([bakeryId, date]) // One summary per bakery per day
-  @@index([bakeryId])
+  @@unique([restaurantId, date]) // One summary per restaurant per day
+  @@index([restaurantId])
   @@index([date])
 }
