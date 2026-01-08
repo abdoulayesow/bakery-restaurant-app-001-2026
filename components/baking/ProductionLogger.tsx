@@ -11,7 +11,7 @@ import {
   ChefHat,
 } from 'lucide-react'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 
 interface InventoryItem {
   id: string
@@ -61,7 +61,7 @@ export function ProductionLogger({
   onCancel,
 }: ProductionLoggerProps) {
   const { t, locale } = useLocale()
-  const { currentBakery } = useBakery()
+  const { currentRestaurant } = useRestaurant()
 
   // Form state
   const [productName, setProductName] = useState('')
@@ -81,11 +81,11 @@ export function ProductionLogger({
   // Fetch inventory items for the selector
   useEffect(() => {
     const fetchItems = async () => {
-      if (!currentBakery) return
+      if (!currentRestaurant) return
 
       setLoadingItems(true)
       try {
-        const response = await fetch(`/api/inventory?bakeryId=${currentBakery.id}`)
+        const response = await fetch(`/api/inventory?restaurantId=${currentRestaurant.id}`)
         if (response.ok) {
           const data = await response.json()
           setInventoryItems(data.items || [])
@@ -98,11 +98,11 @@ export function ProductionLogger({
     }
 
     fetchItems()
-  }, [currentBakery])
+  }, [currentRestaurant])
 
   // Check availability when ingredients change
   const checkAvailability = useCallback(async () => {
-    if (!currentBakery || ingredients.length === 0) {
+    if (!currentRestaurant || ingredients.length === 0) {
       setAvailability(null)
       return
     }
@@ -115,7 +115,7 @@ export function ProductionLogger({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          bakeryId: currentBakery.id,
+          restaurantId: currentRestaurant.id,
           ingredients: ingredients.map((ing) => ({
             itemId: ing.itemId,
             quantity: ing.quantity,
@@ -132,7 +132,7 @@ export function ProductionLogger({
     } finally {
       setCheckingAvailability(false)
     }
-  }, [currentBakery, ingredients])
+  }, [currentRestaurant, ingredients])
 
   // Debounce availability check
   useEffect(() => {
@@ -250,7 +250,7 @@ export function ProductionLogger({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          bakeryId: currentBakery?.id,
+          restaurantId: currentRestaurant?.id,
           date: date || new Date().toISOString(),
           productName,
           productNameFr: productNameFr || null,

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Plus, Search, TrendingUp, RefreshCw, Calendar, Filter } from 'lucide-react'
 import { NavigationHeader } from '@/components/layout/NavigationHeader'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 import { SalesTable } from '@/components/sales/SalesTable'
 import { AddEditSaleModal } from '@/components/sales/AddEditSaleModal'
 
@@ -41,7 +41,7 @@ export default function FinancesSalesPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { t, locale } = useLocale()
-  const { currentBakery, loading: bakeryLoading } = useBakery()
+  const { currentRestaurant, loading: restaurantLoading } = useRestaurant()
 
   const [loading, setLoading] = useState(true)
   const [sales, setSales] = useState<Sale[]>([])
@@ -64,12 +64,12 @@ export default function FinancesSalesPage() {
 
   // Fetch sales
   const fetchSales = useCallback(async () => {
-    if (!currentBakery?.id) return
+    if (!currentRestaurant?.id) return
 
     setLoading(true)
     try {
       const params = new URLSearchParams({
-        bakeryId: currentBakery.id,
+        restaurantId: currentRestaurant.id,
         ...(statusFilter && { status: statusFilter }),
       })
 
@@ -84,13 +84,13 @@ export default function FinancesSalesPage() {
     } finally {
       setLoading(false)
     }
-  }, [currentBakery?.id, statusFilter])
+  }, [currentRestaurant?.id, statusFilter])
 
   useEffect(() => {
-    if (currentBakery?.id) {
+    if (currentRestaurant?.id) {
       fetchSales()
     }
-  }, [currentBakery?.id, fetchSales])
+  }, [currentRestaurant?.id, fetchSales])
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -103,7 +103,7 @@ export default function FinancesSalesPage() {
 
   // Handle add/edit sale
   const handleSaveSale = async (saleData: Partial<Sale>) => {
-    if (!currentBakery?.id) return
+    if (!currentRestaurant?.id) return
 
     setIsSaving(true)
     try {
@@ -116,7 +116,7 @@ export default function FinancesSalesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...saleData,
-          bakeryId: currentBakery.id,
+          restaurantId: currentRestaurant.id,
         }),
       })
 
@@ -195,7 +195,7 @@ export default function FinancesSalesPage() {
   const todaysTotal = todaysSales.reduce((sum, s) => sum + s.totalGNF, 0)
 
   // Loading state
-  if (status === 'loading' || bakeryLoading) {
+  if (status === 'loading' || restaurantLoading) {
     return (
       <div className="min-h-screen bg-cream-50 dark:bg-dark-900">
         <NavigationHeader />
@@ -224,7 +224,7 @@ export default function FinancesSalesPage() {
               {t('sales.title') || 'Sales'}
             </h1>
             <p className="text-terracotta-600/70 dark:text-cream-300/70 mt-1">
-              {currentBakery?.name || 'Loading...'}
+              {currentRestaurant?.name || 'Loading...'}
             </p>
           </div>
 

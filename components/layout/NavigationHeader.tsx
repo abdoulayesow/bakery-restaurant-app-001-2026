@@ -28,7 +28,7 @@ import {
 } from 'lucide-react'
 import { useLocale } from '@/components/providers/LocaleProvider'
 import { useTheme } from '@/components/providers/ThemeProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 import { Logo, colorPalettes, type PaletteName } from '@/components/brand/Logo'
 import { BottomSheet } from '@/components/ui/BottomSheet'
 import { FloatingActionPicker, type FloatingActionItem } from '@/components/ui/FloatingActionPicker'
@@ -107,11 +107,11 @@ export function NavigationHeader() {
   const { data: session } = useSession()
   const { t, locale, setLocale } = useLocale()
   const { theme, toggleTheme } = useTheme()
-  const { bakeries, currentBakery, currentPalette, setCurrentBakery } = useBakery()
+  const { restaurants, currentRestaurant, currentPalette, setCurrentRestaurant } = useRestaurant()
   const pathname = usePathname()
 
   const [navSheetOpen, setNavSheetOpen] = useState<string | null>(null)
-  const [bakerySheetOpen, setBakerySheetOpen] = useState(false)
+  const [restaurantSheetOpen, setRestaurantSheetOpen] = useState(false)
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -139,24 +139,24 @@ export function NavigationHeader() {
     setNavSheetOpen(null)
   }, [pathname])
 
-  // Handle bakery selection from floating picker
-  const handleBakerySelect = (item: FloatingActionItem) => {
-    const bakery = bakeries.find(b => b.id === item.id)
-    if (bakery) {
-      setCurrentBakery(bakery)
+  // Handle restaurant selection from floating picker
+  const handleRestaurantSelect = (item: FloatingActionItem) => {
+    const restaurant = restaurants.find(r => r.id === item.id)
+    if (restaurant) {
+      setCurrentRestaurant(restaurant)
     }
   }
 
-  // Map bakeries to FloatingActionItems - same color for all, active gets current palette color
-  const bakeryPickerItems: FloatingActionItem[] = bakeries.map((bakery, index) => ({
-    id: bakery.id,
-    label: bakery.name,
-    sublabel: bakery.location || undefined,
-    color: bakery.id === currentBakery?.id
+  // Map restaurants to FloatingActionItems - same color for all, active gets current palette color
+  const restaurantPickerItems: FloatingActionItem[] = restaurants.map((restaurant, index) => ({
+    id: restaurant.id,
+    label: restaurant.name,
+    sublabel: restaurant.location || undefined,
+    color: restaurant.id === currentRestaurant?.id
       ? accentColor
       : colorPalettes.terracotta.primary, // All unselected use terracotta
     icon: <Store className="w-5 h-5" strokeWidth={2.5} />,
-    isActive: bakery.id === currentBakery?.id
+    isActive: restaurant.id === currentRestaurant?.id
   }))
 
   return (
@@ -170,9 +170,9 @@ export function NavigationHeader() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
 
-            {/* LEFT: Logo + Bakery trigger */}
+            {/* LEFT: Logo + Restaurant trigger */}
             <button
-              onClick={() => setBakerySheetOpen(true)}
+              onClick={() => setRestaurantSheetOpen(true)}
               className="
                 flex items-center gap-3
                 p-2 -ml-2 rounded-2xl
@@ -180,7 +180,7 @@ export function NavigationHeader() {
                 transition-all duration-300
                 group
               "
-              aria-label={t('bakery.switchBakery') || 'Switch bakery'}
+              aria-label={t('restaurant.switchRestaurant') || 'Switch restaurant'}
             >
               <div className="relative">
                 <Logo size="lg" variant="icon" palette={currentPalette} />
@@ -219,13 +219,13 @@ export function NavigationHeader() {
                 >
                   Bakery<span style={{ color: accentColor }}>Hub</span>
                 </h1>
-                {currentBakery && (
+                {currentRestaurant && (
                   <p className="text-xs text-terracotta-600/70 dark:text-cream-300/70 flex items-center gap-1">
                     <span
                       className="w-2 h-2 rounded-full inline-block"
                       style={{ backgroundColor: accentColor }}
                     />
-                    {currentBakery.name}
+                    {currentRestaurant.name}
                   </p>
                 )}
               </div>
@@ -476,12 +476,12 @@ export function NavigationHeader() {
         </div>
       </header>
 
-      {/* Floating Bakery Picker */}
+      {/* Floating Restaurant Picker */}
       <FloatingActionPicker
-        isOpen={bakerySheetOpen}
-        onClose={() => setBakerySheetOpen(false)}
-        items={bakeryPickerItems}
-        onSelect={handleBakerySelect}
+        isOpen={restaurantSheetOpen}
+        onClose={() => setRestaurantSheetOpen(false)}
+        items={restaurantPickerItems}
+        onSelect={handleRestaurantSelect}
         position="bottom"
       />
 

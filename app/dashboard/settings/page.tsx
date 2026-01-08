@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation'
 import { Settings } from 'lucide-react'
 import { NavigationHeader } from '@/components/layout/NavigationHeader'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { BakerySettings } from '@/components/settings/BakerySettings'
-import { BakeryConfigSettings } from '@/components/settings/BakeryConfigSettings'
+import { RestaurantSettings } from '@/components/settings/RestaurantSettings'
+import { RestaurantConfigSettings } from '@/components/settings/RestaurantConfigSettings'
 
 export default function SettingsPage() {
   const { data: session, status } = useSession()
@@ -64,10 +64,10 @@ export default function SettingsPage() {
         {/* Settings Sections */}
         <div className="space-y-6">
           {/* Stock Deduction Settings */}
-          <BakerySettings />
+          <RestaurantSettings />
 
-          {/* Bakery Configuration */}
-          <BakeryConfigSettings />
+          {/* Restaurant Configuration */}
+          <RestaurantConfigSettings />
         </div>
       </main>
     </div>

@@ -72,18 +72,18 @@ public/
 
 **Stock alerts**: Low stock (below minimum), critical (near zero), expiry warnings
 
-### Multi-Bakery Support
+### Multi-Restaurant Support
 
-Users can be assigned to multiple bakeries via the `UserBakery` junction table.
+Users can be assigned to multiple restaurants via the `UserRestaurant` junction table.
 
-**Bakery Switching:**
-- Bakery selector always visible in header (shows current bakery name)
-- Dropdown only appears if user has access to multiple bakeries
-- Each bakery has a unique accent color from the preset palette
-- Toast notification confirms bakery switch
+**Restaurant Switching:**
+- Restaurant selector always visible in header (shows current restaurant name)
+- Dropdown only appears if user has access to multiple restaurants
+- Each restaurant has a unique accent color from the preset palette
+- Toast notification confirms restaurant switch
 - Data automatically refreshes when switching
 
-**Color Palettes by Bakery Index:**
+**Color Palettes by Restaurant Index:**
 | Index | Palette | Primary Color |
 |-------|---------|---------------|
 | 0 | Terracotta | #C45C26 |
@@ -93,13 +93,13 @@ Users can be assigned to multiple bakeries via the `UserBakery` junction table.
 
 **Context Hooks:**
 ```typescript
-const { currentBakery, currentPalette, setCurrentBakery } = useBakery()
+const { currentRestaurant, currentPalette, setCurrentRestaurant } = useRestaurant()
 // currentPalette: 'terracotta' | 'warmBrown' | 'burntSienna' | 'gold'
 ```
 
 ## Design System
 
-Terracotta theme (#C45C26) as default, with four preset palettes for multi-bakery support. Dark mode fully supported. Key Tailwind patterns:
+Terracotta theme (#C45C26) as default, with four preset palettes for multi-restaurant support. Dark mode fully supported. Key Tailwind patterns:
 
 ```tsx
 // Card

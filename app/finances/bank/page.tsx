@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Building2, ArrowUpRight, ArrowDownRight, RefreshCw, Plus, Wallet } from 'lucide-react'
 import { NavigationHeader } from '@/components/layout/NavigationHeader'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 import { DepositFormModal } from '@/components/bank/DepositFormModal'
 import { DepositList } from '@/components/bank/DepositList'
 import { Toast } from '@/components/ui/Toast'
@@ -34,7 +34,7 @@ export default function BankPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { t, locale } = useLocale()
-  const { currentBakery, loading: bakeryLoading } = useBakery()
+  const { currentRestaurant, loading: restaurantLoading } = useRestaurant()
 
   // Data state
   const [balances, setBalances] = useState({ cash: 0, orangeMoney: 0, card: 0, total: 0 })
@@ -60,10 +60,10 @@ export default function BankPage() {
 
   // Fetch balances
   const fetchBalances = useCallback(async () => {
-    if (!currentBakery) return
+    if (!currentRestaurant) return
 
     try {
-      const response = await fetch(`/api/bank/balances?bakeryId=${currentBakery.id}`)
+      const response = await fetch(`/api/bank/balances?restaurantId=${currentRestaurant.id}`)
       if (!response.ok) throw new Error('Failed to fetch balances')
 
       const data = await response.json()
@@ -72,14 +72,14 @@ export default function BankPage() {
       console.error('Error fetching balances:', err)
       setError(t('errors.fetchFailed') || 'Failed to load data')
     }
-  }, [currentBakery, t])
+  }, [currentRestaurant, t])
 
   // Fetch deposits
   const fetchDeposits = useCallback(async () => {
-    if (!currentBakery) return
+    if (!currentRestaurant) return
 
     try {
-      const response = await fetch(`/api/cash-deposits?bakeryId=${currentBakery.id}`)
+      const response = await fetch(`/api/cash-deposits?restaurantId=${currentRestaurant.id}`)
       if (!response.ok) throw new Error('Failed to fetch deposits')
 
       const data = await response.json()
@@ -88,28 +88,28 @@ export default function BankPage() {
       console.error('Error fetching deposits:', err)
       setError(t('errors.fetchFailed') || 'Failed to load data')
     }
-  }, [currentBakery, t])
+  }, [currentRestaurant, t])
 
-  // Fetch data when bakery changes
+  // Fetch data when restaurant changes
   useEffect(() => {
-    if (currentBakery) {
+    if (currentRestaurant) {
       setLoading(true)
       setError(null)
       Promise.all([fetchBalances(), fetchDeposits()])
         .finally(() => setLoading(false))
     }
-  }, [currentBakery, fetchBalances, fetchDeposits])
+  }, [currentRestaurant, fetchBalances, fetchDeposits])
 
   // Create deposit handler
   const handleCreateDeposit = async (data: { date: string; amount: number; saleId?: string; comments?: string }) => {
-    if (!currentBakery) return
+    if (!currentRestaurant) return
 
     setSaving(true)
     try {
       const response = await fetch('/api/cash-deposits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, bakeryId: currentBakery.id }),
+        body: JSON.stringify({ ...data, restaurantId: currentRestaurant.id }),
       })
 
       if (!response.ok) {
@@ -170,7 +170,7 @@ export default function BankPage() {
     }).format(amount) + ' GNF'
   }
 
-  if (status === 'loading' || bakeryLoading) {
+  if (status === 'loading' || restaurantLoading) {
     return (
       <div className="min-h-screen bg-cream-50 dark:bg-dark-900">
         <NavigationHeader />
@@ -199,7 +199,7 @@ export default function BankPage() {
               {t('bank.title') || 'Bank & Cash'}
             </h1>
             <p className="text-terracotta-600/70 dark:text-cream-300/70 mt-1">
-              {currentBakery?.name || 'Loading...'}
+              {currentRestaurant?.name || 'Loading...'}
             </p>
           </div>
 

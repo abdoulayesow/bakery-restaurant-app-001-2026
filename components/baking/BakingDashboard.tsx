@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { ChefHat, Package, Coins, Plus } from 'lucide-react'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 import { CriticalIngredientsCard } from './CriticalIngredientsCard'
 import { ProductionReadinessCard } from './ProductionReadinessCard'
 
@@ -35,7 +35,7 @@ interface BakingDashboardProps {
 
 export function BakingDashboard({ onAddProduction }: BakingDashboardProps) {
   const { t, locale } = useLocale()
-  const { currentBakery } = useBakery()
+  const { currentRestaurant } = useRestaurant()
 
   const [lowStockItems, setLowStockItems] = useState<LowStockItem[]>([])
   const [productionLogs, setProductionLogs] = useState<ProductionLog[]>([])
@@ -43,11 +43,11 @@ export function BakingDashboard({ onAddProduction }: BakingDashboardProps) {
 
   // Fetch low stock items
   const fetchLowStockItems = useCallback(async () => {
-    if (!currentBakery) return
+    if (!currentRestaurant) return
 
     try {
       const response = await fetch(
-        `/api/inventory?bakeryId=${currentBakery.id}&lowStock=true`
+        `/api/inventory?restaurantId=${currentRestaurant.id}&lowStock=true`
       )
       if (response.ok) {
         const data = await response.json()
@@ -56,16 +56,16 @@ export function BakingDashboard({ onAddProduction }: BakingDashboardProps) {
     } catch (error) {
       console.error('Error fetching low stock items:', error)
     }
-  }, [currentBakery])
+  }, [currentRestaurant])
 
   // Fetch today's production logs
   const fetchProductionLogs = useCallback(async () => {
-    if (!currentBakery) return
+    if (!currentRestaurant) return
 
     try {
       const today = new Date().toISOString().split('T')[0]
       const response = await fetch(
-        `/api/production?bakeryId=${currentBakery.id}&dateFrom=${today}&dateTo=${today}`
+        `/api/production?restaurantId=${currentRestaurant.id}&dateFrom=${today}&dateTo=${today}`
       )
       if (response.ok) {
         const data = await response.json()
@@ -74,7 +74,7 @@ export function BakingDashboard({ onAddProduction }: BakingDashboardProps) {
     } catch (error) {
       console.error('Error fetching production logs:', error)
     }
-  }, [currentBakery])
+  }, [currentRestaurant])
 
   // Initial fetch
   useEffect(() => {
@@ -84,10 +84,10 @@ export function BakingDashboard({ onAddProduction }: BakingDashboardProps) {
       setLoading(false)
     }
 
-    if (currentBakery) {
+    if (currentRestaurant) {
       fetchAll()
     }
-  }, [currentBakery, fetchLowStockItems, fetchProductionLogs])
+  }, [currentRestaurant, fetchLowStockItems, fetchProductionLogs])
 
   // Handle status change
   const handleStatusChange = async (id: string, newStatus: ProductionStatus) => {

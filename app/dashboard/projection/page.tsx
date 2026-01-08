@@ -6,13 +6,13 @@ import { useRouter } from 'next/navigation'
 import { Target, TrendingUp, Calendar, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react'
 import { NavigationHeader } from '@/components/layout/NavigationHeader'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 
 export default function ProjectionPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { t, locale } = useLocale()
-  const { currentBakery, loading: bakeryLoading } = useBakery()
+  const { currentRestaurant, loading: restaurantLoading } = useRestaurant()
 
   useEffect(() => {
     if (status === 'loading') return
@@ -34,7 +34,7 @@ export default function ProjectionPage() {
     }).format(amount) + ' GNF'
   }
 
-  if (status === 'loading' || bakeryLoading) {
+  if (status === 'loading' || restaurantLoading) {
     return (
       <div className="min-h-screen bg-cream-50 dark:bg-dark-900">
         <NavigationHeader />
@@ -62,7 +62,7 @@ export default function ProjectionPage() {
             {t('projection.title') || 'Projections'}
           </h1>
           <p className="text-terracotta-600/70 dark:text-cream-300/70 mt-1">
-            {currentBakery?.name || 'Loading...'}
+            {currentRestaurant?.name || 'Loading...'}
           </p>
         </div>
 

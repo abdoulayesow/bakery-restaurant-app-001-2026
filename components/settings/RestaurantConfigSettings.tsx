@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react'
 import { Save, Loader2, Check, Building2, MapPin, Calendar, DollarSign, Phone, Mail, User } from 'lucide-react'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 
-interface BakeryConfig {
+interface RestaurantConfig {
   name: string
   location: string
   openingDate: string
@@ -20,10 +20,10 @@ interface BakeryConfig {
   currency: string
 }
 
-export function BakeryConfigSettings() {
+export function RestaurantConfigSettings() {
   const { t } = useLocale()
-  const { currentBakery } = useBakery()
-  const [config, setConfig] = useState<BakeryConfig>({
+  const { currentRestaurant } = useRestaurant()
+  const [config, setConfig] = useState<RestaurantConfig>({
     name: '',
     location: '',
     openingDate: '',
@@ -43,36 +43,36 @@ export function BakeryConfigSettings() {
   const [error, setError] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Fetch current bakery config
+  // Fetch current restaurant config
   useEffect(() => {
     async function fetchConfig() {
-      if (!currentBakery) return
+      if (!currentRestaurant) return
 
       try {
         setLoading(true)
-        const response = await fetch(`/api/bakeries/${currentBakery.id}`)
+        const response = await fetch(`/api/restaurants/${currentRestaurant.id}`)
         if (response.ok) {
           const data = await response.json()
-          const bakery = data.bakery
+          const restaurant = data.restaurant
           setConfig({
-            name: bakery.name || '',
-            location: bakery.location || '',
-            openingDate: bakery.openingDate ? bakery.openingDate.split('T')[0] : '',
-            trackingStartDate: bakery.trackingStartDate ? bakery.trackingStartDate.split('T')[0] : '',
-            initialCapital: bakery.initialCapital || 0,
-            initialCashBalance: bakery.initialCashBalance || 0,
-            initialOrangeBalance: bakery.initialOrangeBalance || 0,
-            initialCardBalance: bakery.initialCardBalance || 0,
-            contactPhone: bakery.contactPhone || '',
-            contactEmail: bakery.contactEmail || '',
-            managerName: bakery.managerName || '',
-            currency: bakery.currency || 'GNF'
+            name: restaurant.name || '',
+            location: restaurant.location || '',
+            openingDate: restaurant.openingDate ? restaurant.openingDate.split('T')[0] : '',
+            trackingStartDate: restaurant.trackingStartDate ? restaurant.trackingStartDate.split('T')[0] : '',
+            initialCapital: restaurant.initialCapital || 0,
+            initialCashBalance: restaurant.initialCashBalance || 0,
+            initialOrangeBalance: restaurant.initialOrangeBalance || 0,
+            initialCardBalance: restaurant.initialCardBalance || 0,
+            contactPhone: restaurant.contactPhone || '',
+            contactEmail: restaurant.contactEmail || '',
+            managerName: restaurant.managerName || '',
+            currency: restaurant.currency || 'GNF'
           })
         } else {
-          setError('Failed to load bakery configuration')
+          setError('Failed to load restaurant configuration')
         }
       } catch (err) {
-        setError('Failed to load bakery configuration')
+        setError('Failed to load restaurant configuration')
         console.error(err)
       } finally {
         setLoading(false)
@@ -80,13 +80,13 @@ export function BakeryConfigSettings() {
     }
 
     fetchConfig()
-  }, [currentBakery])
+  }, [currentRestaurant])
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {}
 
     if (!config.name.trim()) {
-      newErrors.name = 'Bakery name is required'
+      newErrors.name = 'Restaurant name is required'
     }
 
     if (config.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(config.contactEmail)) {
@@ -114,14 +114,14 @@ export function BakeryConfigSettings() {
   }
 
   const handleSave = async () => {
-    if (!currentBakery || !validate()) return
+    if (!currentRestaurant || !validate()) return
 
     try {
       setSaving(true)
       setError(null)
       setSaved(false)
 
-      const response = await fetch(`/api/bakeries/${currentBakery.id}`, {
+      const response = await fetch(`/api/restaurants/${currentRestaurant.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +144,7 @@ export function BakeryConfigSettings() {
     }
   }
 
-  const handleChange = (field: keyof BakeryConfig, value: string | number) => {
+  const handleChange = (field: keyof RestaurantConfig, value: string | number) => {
     setConfig(prev => ({ ...prev, [field]: value }))
     // Clear error for this field
     if (errors[field]) {

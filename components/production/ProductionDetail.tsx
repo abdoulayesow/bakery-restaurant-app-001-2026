@@ -13,7 +13,7 @@ import {
   ExternalLink,
 } from 'lucide-react'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 import { ProductionStatus, SubmissionStatus } from '@prisma/client'
 
 interface ProductionDetailProps {
@@ -51,7 +51,7 @@ export default function ProductionDetail({
   onStatusChange,
 }: ProductionDetailProps) {
   const { t, locale } = useLocale()
-  const { currentPalette } = useBakery()
+  const { currentPalette } = useRestaurant()
   const [changing, setChanging] = useState(false)
 
   const productName =

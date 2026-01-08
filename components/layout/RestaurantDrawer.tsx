@@ -4,31 +4,31 @@ import { X, Check, MapPin, Store } from 'lucide-react'
 import { useLocale } from '@/components/providers/LocaleProvider'
 import { colorPalettes, type PaletteName } from '@/components/brand/Logo'
 
-interface Bakery {
+interface Restaurant {
   id: string
   name: string
   location: string | null
 }
 
-interface BakeryDrawerProps {
+interface RestaurantDrawerProps {
   isOpen: boolean
   onClose: () => void
-  bakeries: Bakery[]
-  currentBakeryId: string | null
-  onSelectBakery: (bakery: Bakery) => void
+  restaurants: Restaurant[]
+  currentRestaurantId: string | null
+  onSelectRestaurant: (restaurant: Restaurant) => void
 }
 
 const paletteNames: PaletteName[] = ['terracotta', 'warmBrown', 'burntSienna', 'gold']
 
-export function BakeryDrawer({
+export function RestaurantDrawer({
   isOpen,
   onClose,
-  bakeries,
-  currentBakeryId,
-  onSelectBakery,
-}: BakeryDrawerProps) {
+  restaurants,
+  currentRestaurantId,
+  onSelectRestaurant,
+}: RestaurantDrawerProps) {
   const { t } = useLocale()
-  const currentBakery = bakeries.find(b => b.id === currentBakeryId)
+  const currentRestaurant = restaurants.find(r => r.id === currentRestaurantId)
 
   if (!isOpen) return null
 
@@ -54,17 +54,17 @@ export function BakeryDrawer({
         "
         role="dialog"
         aria-modal="true"
-        aria-labelledby="bakery-drawer-title"
+        aria-labelledby="restaurant-drawer-title"
       >
         {/* Header */}
         <div className="p-6 border-b border-terracotta-500/15 dark:border-terracotta-400/20">
           <div className="flex items-center justify-between mb-4">
             <h2
-              id="bakery-drawer-title"
+              id="restaurant-drawer-title"
               className="text-xl font-serif text-terracotta-900 dark:text-cream-100"
               style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
             >
-              {t('bakery.myBakeries') || 'My Bakeries'}
+              {t('restaurant.myRestaurants') || 'My Restaurants'}
             </h2>
             <button
               onClick={onClose}
@@ -75,49 +75,49 @@ export function BakeryDrawer({
             </button>
           </div>
 
-          {/* Current bakery highlight */}
-          {currentBakery && (
+          {/* Current restaurant highlight */}
+          {currentRestaurant && (
             <div
               className="p-4 rounded-2xl bg-terracotta-500/10 dark:bg-terracotta-400/10"
               style={{
-                borderLeft: `4px solid ${colorPalettes[paletteNames[bakeries.findIndex(b => b.id === currentBakeryId) % 4]].primary}`
+                borderLeft: `4px solid ${colorPalettes[paletteNames[restaurants.findIndex(r => r.id === currentRestaurantId) % 4]].primary}`
               }}
             >
               <p className="text-xs uppercase tracking-wider text-terracotta-600/70 dark:text-cream-300/70 mb-1 font-medium">
-                {t('bakery.currentlyActive') || 'Currently Active'}
+                {t('restaurant.currentlyActive') || 'Currently Active'}
               </p>
               <p
                 className="text-lg text-terracotta-900 dark:text-cream-100"
                 style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
               >
-                {currentBakery.name}
+                {currentRestaurant.name}
               </p>
-              {currentBakery.location && (
+              {currentRestaurant.location && (
                 <p className="text-sm text-terracotta-600/80 dark:text-cream-300/80 flex items-center gap-1 mt-1">
                   <MapPin className="w-3 h-3" />
-                  {currentBakery.location}
+                  {currentRestaurant.location}
                 </p>
               )}
             </div>
           )}
         </div>
 
-        {/* Bakery list */}
+        {/* Restaurant list */}
         <div className="flex-1 overflow-y-auto p-4">
           <p className="text-xs uppercase tracking-wider text-terracotta-600/70 dark:text-cream-300/70 mb-3 px-2 font-medium">
-            {t('bakery.switchBakery') || 'Switch Bakery'}
+            {t('restaurant.switchRestaurant') || 'Switch Restaurant'}
           </p>
 
           <div className="space-y-2">
-            {bakeries.map((bakery, index) => {
-              const isSelected = bakery.id === currentBakeryId
-              const bakeryPalette = colorPalettes[paletteNames[index % 4]]
+            {restaurants.map((restaurant, index) => {
+              const isSelected = restaurant.id === currentRestaurantId
+              const restaurantPalette = colorPalettes[paletteNames[index % 4]]
 
               return (
                 <button
-                  key={bakery.id}
+                  key={restaurant.id}
                   onClick={() => {
-                    onSelectBakery(bakery)
+                    onSelectRestaurant(restaurant)
                     onClose()
                   }}
                   className={`
@@ -134,21 +134,21 @@ export function BakeryDrawer({
                     <div
                       className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
                       style={{
-                        backgroundColor: bakeryPalette.primary,
+                        backgroundColor: restaurantPalette.primary,
                         fontFamily: "'DM Serif Display', Georgia, serif"
                       }}
                     >
-                      {bakery.name.charAt(0).toUpperCase()}
+                      {restaurant.name.charAt(0).toUpperCase()}
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <p className="text-terracotta-900 dark:text-cream-100 font-medium truncate">
-                        {bakery.name}
+                        {restaurant.name}
                       </p>
-                      {bakery.location && (
+                      {restaurant.location && (
                         <p className="text-sm text-terracotta-600/70 dark:text-cream-300/70 truncate flex items-center gap-1">
                           <MapPin className="w-3 h-3" />
-                          {bakery.location}
+                          {restaurant.location}
                         </p>
                       )}
                     </div>
@@ -168,9 +168,9 @@ export function BakeryDrawer({
           <div className="flex items-center justify-center gap-2 text-xs text-terracotta-600/60 dark:text-cream-300/60">
             <Store className="w-4 h-4" />
             <span>
-              {bakeries.length} {bakeries.length === 1
-                ? (t('bakery.bakeryAccessible') || 'bakery accessible')
-                : (t('bakery.bakeriesAccessible') || 'bakeries accessible')
+              {restaurants.length} {restaurants.length === 1
+                ? (t('restaurant.restaurantAccessible') || 'restaurant accessible')
+                : (t('restaurant.restaurantsAccessible') || 'restaurants accessible')
               }
             </span>
           </div>
@@ -180,4 +180,4 @@ export function BakeryDrawer({
   )
 }
 
-export default BakeryDrawer
+export default RestaurantDrawer

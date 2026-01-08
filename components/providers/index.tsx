@@ -3,7 +3,7 @@
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider } from './ThemeProvider'
 import { LocaleProvider } from './LocaleProvider'
-import { BakeryProvider } from './BakeryProvider'
+import { RestaurantProvider } from './RestaurantProvider'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -13,7 +13,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     >
       <ThemeProvider>
         <LocaleProvider>
-          <BakeryProvider>{children}</BakeryProvider>
+          <RestaurantProvider>{children}</RestaurantProvider>
         </LocaleProvider>
       </ThemeProvider>
     </SessionProvider>

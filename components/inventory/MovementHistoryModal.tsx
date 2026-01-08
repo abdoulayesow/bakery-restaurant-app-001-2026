@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { X, ArrowUpCircle, ArrowDownCircle, RefreshCw, AlertTriangle } from 'lucide-react'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 import { InventoryItem } from './InventoryTable'
 
 interface StockMovement {
@@ -29,26 +29,26 @@ export function MovementHistoryModal({
   item,
 }: MovementHistoryModalProps) {
   const { t, locale } = useLocale()
-  const { currentBakery } = useBakery()
+  const { currentRestaurant } = useRestaurant()
   const [movements, setMovements] = useState<StockMovement[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (isOpen && item && currentBakery) {
+    if (isOpen && item && currentRestaurant) {
       fetchMovements()
     }
-  }, [isOpen, item, currentBakery])
+  }, [isOpen, item, currentRestaurant])
 
   const fetchMovements = async () => {
-    if (!item || !currentBakery) return
+    if (!item || !currentRestaurant) return
 
     setLoading(true)
     setError(null)
 
     try {
       const response = await fetch(
-        `/api/stock-movements?bakeryId=${currentBakery.id}&itemId=${item.id}&limit=50`
+        `/api/stock-movements?restaurantId=${currentRestaurant.id}&itemId=${item.id}&limit=50`
       )
 
       if (!response.ok) {

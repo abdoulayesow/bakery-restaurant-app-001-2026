@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react'
 import { Save, Loader2, Check } from 'lucide-react'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 
 type StockDeductionMode = 'immediate' | 'deferred'
 
-export function BakerySettings() {
+export function RestaurantSettings() {
   const { t } = useLocale()
-  const { currentBakery } = useBakery()
+  const { currentRestaurant } = useRestaurant()
   const [mode, setMode] = useState<StockDeductionMode>('immediate')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -19,11 +19,11 @@ export function BakerySettings() {
   // Fetch current settings
   useEffect(() => {
     async function fetchSettings() {
-      if (!currentBakery) return
+      if (!currentRestaurant) return
 
       try {
         setLoading(true)
-        const response = await fetch(`/api/bakery/settings?bakeryId=${currentBakery.id}`)
+        const response = await fetch(`/api/restaurant/settings?restaurantId=${currentRestaurant.id}`)
         if (response.ok) {
           const data = await response.json()
           setMode(data.stockDeductionMode)
@@ -39,23 +39,23 @@ export function BakerySettings() {
     }
 
     fetchSettings()
-  }, [currentBakery])
+  }, [currentRestaurant])
 
   const handleSave = async () => {
-    if (!currentBakery) return
+    if (!currentRestaurant) return
 
     try {
       setSaving(true)
       setError(null)
       setSaved(false)
 
-      const response = await fetch('/api/bakery/settings', {
+      const response = await fetch('/api/restaurant/settings', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          bakeryId: currentBakery.id,
+          restaurantId: currentRestaurant.id,
           stockDeductionMode: mode,
         }),
       })

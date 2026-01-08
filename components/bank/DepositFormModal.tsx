@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 
 interface Sale {
   id: string
@@ -31,7 +31,7 @@ export function DepositFormModal({
   isLoading = false,
 }: DepositFormModalProps) {
   const { t, locale } = useLocale()
-  const { currentBakery } = useBakery()
+  const { currentRestaurant } = useRestaurant()
 
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0], // Today's date
@@ -46,10 +46,10 @@ export function DepositFormModal({
 
   // Fetch available sales (approved sales without deposits)
   useEffect(() => {
-    if (isOpen && currentBakery) {
+    if (isOpen && currentRestaurant) {
       fetchAvailableSales()
     }
-  }, [isOpen, currentBakery])
+  }, [isOpen, currentRestaurant])
 
   // Reset form when modal opens
   useEffect(() => {
@@ -65,12 +65,12 @@ export function DepositFormModal({
   }, [isOpen])
 
   const fetchAvailableSales = async () => {
-    if (!currentBakery) return
+    if (!currentRestaurant) return
 
     setLoadingSales(true)
     try {
       const response = await fetch(
-        `/api/sales?bakeryId=${currentBakery.id}&status=Approved`
+        `/api/sales?restaurantId=${currentRestaurant.id}&status=Approved`
       )
 
       if (response.ok) {
@@ -136,7 +136,7 @@ export function DepositFormModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!validate() || !currentBakery) return
+    if (!validate() || !currentRestaurant) return
 
     await onSubmit({
       date: formData.date,

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { NavigationHeader } from '@/components/layout/NavigationHeader'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 import { RevenueChart } from '@/components/dashboard/RevenueChart'
 import { ExpensesPieChart } from '@/components/dashboard/ExpensesPieChart'
 
@@ -50,18 +50,18 @@ export default function DashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { t, locale } = useLocale()
-  const { currentBakery, loading: bakeryLoading } = useBakery()
+  const { currentRestaurant, loading: restaurantLoading } = useRestaurant()
 
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState<PeriodDays>(30)
 
   const fetchDashboardData = useCallback(async () => {
-    if (!currentBakery?.id) return
+    if (!currentRestaurant?.id) return
 
     setLoading(true)
     try {
-      const res = await fetch(`/api/dashboard?bakeryId=${currentBakery.id}&period=${period}`)
+      const res = await fetch(`/api/dashboard?restaurantId=${currentRestaurant.id}&period=${period}`)
       if (res.ok) {
         const data = await res.json()
         setDashboardData(data)
@@ -71,7 +71,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [currentBakery?.id, period])
+  }, [currentRestaurant?.id, period])
 
   useEffect(() => {
     if (status === 'loading') return
@@ -86,10 +86,10 @@ export default function DashboardPage() {
   }, [session, status, router])
 
   useEffect(() => {
-    if (currentBakery?.id) {
+    if (currentRestaurant?.id) {
       fetchDashboardData()
     }
-  }, [currentBakery?.id, period, fetchDashboardData])
+  }, [currentRestaurant?.id, period, fetchDashboardData])
 
   // Format GNF amount
   const formatGNF = (value: number) => {
@@ -101,7 +101,7 @@ export default function DashboardPage() {
     return locale === 'fr' ? item.nameFr : item.name
   }
 
-  if (status === 'loading' || bakeryLoading) {
+  if (status === 'loading' || restaurantLoading) {
     return (
       <div className="min-h-screen bg-cream-50 dark:bg-dark-900">
         <NavigationHeader />
@@ -137,8 +137,8 @@ export default function DashboardPage() {
               {t('dashboard.title')}
             </h1>
             <p className="text-terracotta-600/70 dark:text-cream-300/70 mt-1">
-              {currentBakery?.name || 'Loading...'}
-              {currentBakery?.location && ` - ${currentBakery.location}`}
+              {currentRestaurant?.name || 'Loading...'}
+              {currentRestaurant?.location && ` - ${currentRestaurant.location}`}
             </p>
           </div>
 

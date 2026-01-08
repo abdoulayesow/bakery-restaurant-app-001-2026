@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Plus, Utensils, Calendar, RefreshCw, ChevronDown, CheckCircle2, Search } from 'lucide-react'
 import { NavigationHeader } from '@/components/layout/NavigationHeader'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 import { BakingDashboard, AddProductionModal } from '@/components/baking'
 
 type ProductionStatus = 'Planning' | 'Ready' | 'InProgress' | 'Complete'
@@ -29,7 +29,7 @@ export default function BakingProductionPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { t, locale } = useLocale()
-  const { currentBakery, loading: bakeryLoading } = useBakery()
+  const { currentRestaurant, loading: restaurantLoading } = useRestaurant()
 
   // Modal state
   const [addModalOpen, setAddModalOpen] = useState(false)
@@ -56,7 +56,7 @@ export default function BakingProductionPage() {
 
   // Fetch production logs
   const fetchProductionLogs = useCallback(async () => {
-    if (!currentBakery) return
+    if (!currentRestaurant) return
 
     setLoadingLogs(true)
     try {
@@ -77,7 +77,7 @@ export default function BakingProductionPage() {
       }
 
       const response = await fetch(
-        `/api/production?bakeryId=${currentBakery.id}&dateFrom=${dateFrom}&dateTo=${dateTo}`
+        `/api/production?restaurantId=${currentRestaurant.id}&dateFrom=${dateFrom}&dateTo=${dateTo}`
       )
       if (response.ok) {
         const data = await response.json()
@@ -88,7 +88,7 @@ export default function BakingProductionPage() {
     } finally {
       setLoadingLogs(false)
     }
-  }, [currentBakery, selectedDateRange])
+  }, [currentRestaurant, selectedDateRange])
 
   // Filter production logs client-side
   const filteredLogs = productionLogs.filter((log) => {
@@ -114,10 +114,10 @@ export default function BakingProductionPage() {
   })
 
   useEffect(() => {
-    if (currentBakery) {
+    if (currentRestaurant) {
       fetchProductionLogs()
     }
-  }, [currentBakery, fetchProductionLogs])
+  }, [currentRestaurant, fetchProductionLogs])
 
   // Handle production added
   const handleProductionAdded = () => {
@@ -170,7 +170,7 @@ export default function BakingProductionPage() {
   }
 
   // Loading state
-  if (status === 'loading' || bakeryLoading) {
+  if (status === 'loading' || restaurantLoading) {
     return (
       <div className="min-h-screen bg-cream-50 dark:bg-dark-900">
         <NavigationHeader />
@@ -204,7 +204,7 @@ export default function BakingProductionPage() {
               {t('production.title') || 'Production'}
             </h1>
             <p className="text-terracotta-600/70 dark:text-cream-300/70 mt-1">
-              {currentBakery?.name || 'Loading...'}
+              {currentRestaurant?.name || 'Loading...'}
             </p>
           </div>
 

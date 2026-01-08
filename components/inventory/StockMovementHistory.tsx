@@ -11,7 +11,7 @@ import {
   ExternalLink,
 } from 'lucide-react'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 import { MovementType } from '@prisma/client'
 
 interface StockMovement {
@@ -46,7 +46,7 @@ export default function StockMovementHistory({
   initialStock = 0,
 }: StockMovementHistoryProps) {
   const { t, locale } = useLocale()
-  const { currentPalette } = useBakery()
+  const { currentPalette } = useRestaurant()
 
   const [typeFilter, setTypeFilter] = useState<MovementType | 'all'>('all')
   const [currentPage, setCurrentPage] = useState(1)

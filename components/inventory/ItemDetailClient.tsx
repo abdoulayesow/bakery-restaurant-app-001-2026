@@ -6,7 +6,7 @@ import ItemDetailHeader from './ItemDetailHeader'
 import StockMovementHistory from './StockMovementHistory'
 import { StockAdjustmentModal } from './StockAdjustmentModal'
 import { Toast } from '@/components/ui/Toast'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 import { MovementType } from '@prisma/client'
 
 interface SerializedItem {
@@ -47,10 +47,10 @@ export function ItemDetailClient({ item, movements, initialStock }: Props) {
   const [isLoading, setIsLoading] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const router = useRouter()
-  const { currentBakery } = useBakery()
+  const { currentRestaurant } = useRestaurant()
 
   const handleAdjust = async (data: any) => {
-    if (!currentBakery) return
+    if (!currentRestaurant) return
 
     setIsLoading(true)
     try {
@@ -58,7 +58,7 @@ export function ItemDetailClient({ item, movements, initialStock }: Props) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bakeryId: currentBakery.id,
+          restaurantId: currentRestaurant.id,
           ...data
         })
       })

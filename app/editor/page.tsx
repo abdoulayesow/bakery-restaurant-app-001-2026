@@ -15,13 +15,13 @@ import {
 } from 'lucide-react'
 import { DashboardHeader } from '@/components/layout/DashboardHeader'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 
 export default function EditorPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { t } = useLocale()
-  const { currentBakery, loading: bakeryLoading } = useBakery()
+  const { currentRestaurant, loading: restaurantLoading } = useRestaurant()
 
   useEffect(() => {
     if (status === 'loading') return
@@ -30,7 +30,7 @@ export default function EditorPage() {
     }
   }, [session, status, router])
 
-  if (status === 'loading' || bakeryLoading) {
+  if (status === 'loading' || restaurantLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
         <DashboardHeader />
@@ -61,10 +61,10 @@ export default function EditorPage() {
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             {t('editor.welcomeMessage')}
           </p>
-          {currentBakery && (
+          {currentRestaurant && (
             <p className="text-sm text-gold-600 dark:text-gold-400 mt-2">
-              {currentBakery.name}
-              {currentBakery.location && ` - ${currentBakery.location}`}
+              {currentRestaurant.name}
+              {currentRestaurant.location && ` - ${currentRestaurant.location}`}
             </p>
           )}
         </div>

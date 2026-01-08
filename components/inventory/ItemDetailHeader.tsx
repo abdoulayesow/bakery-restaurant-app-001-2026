@@ -2,7 +2,7 @@
 
 import { Package, AlertTriangle, AlertCircle, CheckCircle } from 'lucide-react'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 
 interface ItemDetailHeaderProps {
   item: {
@@ -26,7 +26,7 @@ export default function ItemDetailHeader({
   onAdjustStock,
 }: ItemDetailHeaderProps) {
   const { t, locale } = useLocale()
-  const { currentPalette } = useBakery()
+  const { currentPalette } = useRestaurant()
 
   const itemName = locale === 'fr' && item.nameFr ? item.nameFr : item.name
 

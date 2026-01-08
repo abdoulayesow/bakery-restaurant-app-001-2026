@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Plus, Search, Package, RefreshCw } from 'lucide-react'
 import { NavigationHeader } from '@/components/layout/NavigationHeader'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 import { InventoryTable, InventoryItem } from '@/components/inventory/InventoryTable'
 import { CategoryFilter } from '@/components/inventory/CategoryFilter'
 import { AddEditItemModal } from '@/components/inventory/AddEditItemModal'
@@ -17,7 +17,7 @@ export default function BakingInventoryPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { t } = useLocale()
-  const { currentBakery, loading: bakeryLoading } = useBakery()
+  const { currentRestaurant, loading: restaurantLoading } = useRestaurant()
 
   // Data state
   const [items, setItems] = useState<InventoryItem[]>([])
@@ -48,14 +48,14 @@ export default function BakingInventoryPage() {
 
   // Fetch inventory items
   const fetchItems = useCallback(async () => {
-    if (!currentBakery) return
+    if (!currentRestaurant) return
 
     setLoading(true)
     setError(null)
 
     try {
       const params = new URLSearchParams({
-        bakeryId: currentBakery.id,
+        restaurantId: currentRestaurant.id,
       })
 
       if (searchQuery) {
@@ -82,18 +82,18 @@ export default function BakingInventoryPage() {
     } finally {
       setLoading(false)
     }
-  }, [currentBakery, searchQuery, categoryFilter, showLowStockOnly, t])
+  }, [currentRestaurant, searchQuery, categoryFilter, showLowStockOnly, t])
 
   useEffect(() => {
-    if (currentBakery) {
+    if (currentRestaurant) {
       fetchItems()
     }
-  }, [currentBakery, fetchItems])
+  }, [currentRestaurant, fetchItems])
 
   // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (currentBakery) {
+      if (currentRestaurant) {
         fetchItems()
       }
     }, 300)
@@ -142,7 +142,7 @@ export default function BakingInventoryPage() {
   }
 
   const handleSaveItem = async (data: Partial<InventoryItem>) => {
-    if (!currentBakery) return
+    if (!currentRestaurant) return
 
     setSaving(true)
 
@@ -160,7 +160,7 @@ export default function BakingInventoryPage() {
         },
         body: JSON.stringify({
           ...data,
-          bakeryId: currentBakery.id,
+          restaurantId: currentRestaurant.id,
         }),
       })
 
@@ -216,7 +216,7 @@ export default function BakingInventoryPage() {
   }
 
   // Loading state
-  if (status === 'loading' || bakeryLoading) {
+  if (status === 'loading' || restaurantLoading) {
     return (
       <div className="min-h-screen bg-cream-50 dark:bg-dark-900">
         <NavigationHeader />
@@ -251,8 +251,8 @@ export default function BakingInventoryPage() {
               {t('inventory.title')}
             </h1>
             <p className="text-terracotta-600/70 dark:text-cream-300/70 mt-1">
-              {currentBakery?.name || 'Loading...'}
-              {currentBakery?.location && ` - ${currentBakery.location}`}
+              {currentRestaurant?.name || 'Loading...'}
+              {currentRestaurant?.location && ` - ${currentRestaurant.location}`}
             </p>
           </div>
 

@@ -22,7 +22,7 @@ import {
 } from 'lucide-react'
 import { useLocale } from '@/components/providers/LocaleProvider'
 import { useTheme } from '@/components/providers/ThemeProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 import { Logo, colorPalettes } from '@/components/brand/Logo'
 
 const managerLinks = [
@@ -46,11 +46,11 @@ export function DashboardHeader() {
   const { data: session } = useSession()
   const { t, locale, setLocale } = useLocale()
   const { theme, toggleTheme } = useTheme()
-  const { bakeries, currentBakery, currentPalette, setCurrentBakery } = useBakery()
+  const { restaurants, currentRestaurant, currentPalette, setCurrentRestaurant } = useRestaurant()
   const accentColor = colorPalettes[currentPalette].primary
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [bakeryDropdownOpen, setBakeryDropdownOpen] = useState(false)
+  const [restaurantDropdownOpen, setRestaurantDropdownOpen] = useState(false)
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
 
   const isManager = session?.user?.role === 'Manager'
@@ -68,13 +68,13 @@ export function DashboardHeader() {
               <Logo size="md" variant="icon" palette={currentPalette} className="sm:hidden" />
             </Link>
 
-            {/* Bakery Selector - Always visible */}
-            {currentBakery && (
+            {/* Restaurant Selector - Always visible */}
+            {currentRestaurant && (
               <div className="relative">
                 <button
-                  onClick={() => bakeries.length > 1 && setBakeryDropdownOpen(!bakeryDropdownOpen)}
+                  onClick={() => restaurants.length > 1 && setRestaurantDropdownOpen(!restaurantDropdownOpen)}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
-                    bakeries.length > 1
+                    restaurants.length > 1
                       ? 'hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer'
                       : 'cursor-default'
                   }`}
@@ -85,38 +85,38 @@ export function DashboardHeader() {
                 >
                   <Store className="w-4 h-4" style={{ color: accentColor }} />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 max-w-[150px] truncate">
-                    {currentBakery.name}
+                    {currentRestaurant.name}
                   </span>
-                  {bakeries.length > 1 && (
+                  {restaurants.length > 1 && (
                     <ChevronDown className="w-4 h-4 text-gray-500" />
                   )}
                 </button>
 
-                {bakeryDropdownOpen && bakeries.length > 1 && (
+                {restaurantDropdownOpen && restaurants.length > 1 && (
                   <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
-                    {bakeries.map((bakery, index) => {
-                      const bakeryPalette = colorPalettes[['terracotta', 'warmBrown', 'burntSienna', 'gold'][index % 4] as keyof typeof colorPalettes]
+                    {restaurants.map((restaurant, index) => {
+                      const restaurantPalette = colorPalettes[['terracotta', 'warmBrown', 'burntSienna', 'gold'][index % 4] as keyof typeof colorPalettes]
                       return (
                         <button
-                          key={bakery.id}
+                          key={restaurant.id}
                           onClick={() => {
-                            setCurrentBakery(bakery)
-                            setBakeryDropdownOpen(false)
+                            setCurrentRestaurant(restaurant)
+                            setRestaurantDropdownOpen(false)
                           }}
                           className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
-                            bakery.id === currentBakery.id
+                            restaurant.id === currentRestaurant.id
                               ? 'font-medium'
                               : 'text-gray-700 dark:text-gray-300'
                           }`}
                         >
                           <span
                             className="w-2 h-2 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: bakeryPalette.primary }}
+                            style={{ backgroundColor: restaurantPalette.primary }}
                           />
                           <span className="flex-1">
-                            {bakery.name}
-                            {bakery.location && (
-                              <span className="block text-xs text-gray-500">{bakery.location}</span>
+                            {restaurant.name}
+                            {restaurant.location && (
+                              <span className="block text-xs text-gray-500">{restaurant.location}</span>
                             )}
                           </span>
                         </button>

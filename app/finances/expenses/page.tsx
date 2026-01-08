@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Plus, Search, Receipt, RefreshCw, Filter, Calendar } from 'lucide-react'
 import { NavigationHeader } from '@/components/layout/NavigationHeader'
 import { useLocale } from '@/components/providers/LocaleProvider'
-import { useBakery } from '@/components/providers/BakeryProvider'
+import { useRestaurant } from '@/components/providers/RestaurantProvider'
 import { ExpensesTable } from '@/components/expenses/ExpensesTable'
 import { AddEditExpenseModal } from '@/components/expenses/AddEditExpenseModal'
 
@@ -74,7 +74,7 @@ export default function ExpensesPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { t, locale } = useLocale()
-  const { currentBakery, loading: bakeryLoading } = useBakery()
+  const { currentRestaurant, loading: restaurantLoading } = useRestaurant()
 
   const [loading, setLoading] = useState(true)
   const [expenses, setExpenses] = useState<Expense[]>([])
@@ -126,9 +126,9 @@ export default function ExpensesPage() {
 
   // Fetch inventory items
   const fetchInventoryItems = useCallback(async () => {
-    if (!currentBakery?.id) return
+    if (!currentRestaurant?.id) return
     try {
-      const res = await fetch(`/api/inventory?bakeryId=${currentBakery.id}`)
+      const res = await fetch(`/api/inventory?restaurantId=${currentRestaurant.id}`)
       if (res.ok) {
         const data = await res.json()
         setInventoryItems(data.items || [])
@@ -136,16 +136,16 @@ export default function ExpensesPage() {
     } catch (error) {
       console.error('Error fetching inventory items:', error)
     }
-  }, [currentBakery?.id])
+  }, [currentRestaurant?.id])
 
   // Fetch expenses
   const fetchExpenses = useCallback(async () => {
-    if (!currentBakery?.id) return
+    if (!currentRestaurant?.id) return
 
     setLoading(true)
     try {
       const params = new URLSearchParams({
-        bakeryId: currentBakery.id,
+        restaurantId: currentRestaurant.id,
         ...(statusFilter && { status: statusFilter }),
         ...(categoryFilter && { categoryId: categoryFilter }),
       })
@@ -161,17 +161,17 @@ export default function ExpensesPage() {
     } finally {
       setLoading(false)
     }
-  }, [currentBakery?.id, statusFilter, categoryFilter])
+  }, [currentRestaurant?.id, statusFilter, categoryFilter])
 
   // Initial data fetch
   useEffect(() => {
-    if (currentBakery?.id) {
+    if (currentRestaurant?.id) {
       fetchExpenses()
       fetchCategories()
       fetchSuppliers()
       fetchInventoryItems()
     }
-  }, [currentBakery?.id, fetchExpenses, fetchCategories, fetchSuppliers, fetchInventoryItems])
+  }, [currentRestaurant?.id, fetchExpenses, fetchCategories, fetchSuppliers, fetchInventoryItems])
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -184,7 +184,7 @@ export default function ExpensesPage() {
 
   // Handle save expense
   const handleSaveExpense = async (expenseData: Partial<Expense>) => {
-    if (!currentBakery?.id) return
+    if (!currentRestaurant?.id) return
 
     setIsSaving(true)
     try {
@@ -197,7 +197,7 @@ export default function ExpensesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...expenseData,
-          bakeryId: currentBakery.id,
+          restaurantId: currentRestaurant.id,
         }),
       })
 
@@ -283,7 +283,7 @@ export default function ExpensesPage() {
     )
   })
 
-  if (status === 'loading' || bakeryLoading) {
+  if (status === 'loading' || restaurantLoading) {
     return (
       <div className="min-h-screen bg-cream-50 dark:bg-dark-900">
         <NavigationHeader />
@@ -312,7 +312,7 @@ export default function ExpensesPage() {
               {t('expenses.title') || 'Expenses'}
             </h1>
             <p className="text-terracotta-600/70 dark:text-cream-300/70 mt-1">
-              {currentBakery?.name || 'Loading...'}
+              {currentRestaurant?.name || 'Loading...'}
             </p>
           </div>
 
