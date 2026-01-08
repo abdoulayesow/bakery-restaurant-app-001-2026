@@ -10,7 +10,7 @@ interface Expense {
   date: string
   categoryName: string
   amountGNF: number
-  paymentMethod: 'Cash' | 'OrangeMoney' | 'Card'
+  paymentMethod: string
   description?: string | null
   status: 'Pending' | 'Approved' | 'Rejected'
   submittedByName?: string | null
@@ -75,12 +75,15 @@ export function ExpensesTable({
     }).format(date)
   }
 
-  // Payment method config
-  const paymentMethodConfig = {
-    Cash: { label: t('expenses.cash') || 'Cash', icon: DollarSign, color: 'text-green-600 dark:text-green-400' },
-    OrangeMoney: { label: t('expenses.orangeMoney') || 'Orange Money', icon: Smartphone, color: 'text-orange-600 dark:text-orange-400' },
-    Card: { label: t('expenses.card') || 'Card', icon: CreditCard, color: 'text-blue-600 dark:text-blue-400' },
+  // Payment method config - keys match database values
+  const paymentMethodConfig: Record<string, { label: string; icon: typeof DollarSign; color: string }> = {
+    'Cash': { label: t('expenses.cash') || 'Cash', icon: DollarSign, color: 'text-green-600 dark:text-green-400' },
+    'Orange Money': { label: t('expenses.orangeMoney') || 'Orange Money', icon: Smartphone, color: 'text-orange-600 dark:text-orange-400' },
+    'Card': { label: t('expenses.card') || 'Card', icon: CreditCard, color: 'text-blue-600 dark:text-blue-400' },
   }
+
+  // Fallback config for unknown payment methods
+  const defaultPaymentConfig = { label: 'Unknown', icon: DollarSign, color: 'text-gray-600 dark:text-gray-400' }
 
   // Handle sort
   const handleSort = (field: SortField) => {
@@ -191,7 +194,7 @@ export function ExpensesTable({
         </thead>
         <tbody className="bg-cream-100 dark:bg-dark-800">
           {sortedExpenses.map((expense, index) => {
-            const paymentConfig = paymentMethodConfig[expense.paymentMethod]
+            const paymentConfig = paymentMethodConfig[expense.paymentMethod] || defaultPaymentConfig
             const PaymentIcon = paymentConfig.icon
 
             return (

@@ -315,11 +315,24 @@
     "thisQuarter": "This Quarter"
   },
   "bakery": {
-    "myBakeries": "My Bakeries",
+    "myBakeries": "My Restaurants",
     "currentlyActive": "Currently Active",
-    "switchBakery": "Switch Bakery",
-    "bakeryAccessible": "bakery accessible",
-    "bakeriesAccessible": "bakeries accessible"
+    "switchBakery": "Switch Restaurant",
+    "bakeryAccessible": "restaurant accessible",
+    "bakeriesAccessible": "restaurants accessible"
+  },
+  "restaurant": {
+    "myRestaurants": "My Restaurants",
+    "currentlyActive": "Currently Active",
+    "switchRestaurant": "Switch Restaurant",
+    "restaurantAccessible": "restaurant accessible",
+    "restaurantsAccessible": "restaurants accessible",
+    "types": {
+      "Bakery": "Bakery",
+      "Cafe": "Café",
+      "Restaurant": "Restaurant",
+      "FastFood": "Fast Food"
+    }
   },
   "validation": {
     "required": "Required"

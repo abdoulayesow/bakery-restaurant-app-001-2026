@@ -42,7 +42,7 @@ interface Expense {
   categoryId?: string | null
   categoryName: string
   amountGNF: number
-  paymentMethod: 'Cash' | 'OrangeMoney' | 'Card'
+  paymentMethod: string
   description?: string | null
   transactionRef?: string | null
   supplierId?: string | null
@@ -91,7 +91,7 @@ export function AddEditExpenseModal({
     categoryId: '',
     categoryName: '',
     amountGNF: 0,
-    paymentMethod: '' as '' | 'Cash' | 'OrangeMoney' | 'Card',
+    paymentMethod: '',
     description: '',
     transactionRef: '',
     supplierId: '',
@@ -288,7 +288,7 @@ export function AddEditExpenseModal({
       categoryId: formData.categoryId || null,
       categoryName: formData.categoryName,
       amountGNF: formData.amountGNF,
-      paymentMethod: formData.paymentMethod as 'Cash' | 'OrangeMoney' | 'Card',
+      paymentMethod: formData.paymentMethod,
       description: formData.description || null,
       transactionRef: formData.transactionRef || null,
       supplierId: formData.supplierId || null,
@@ -457,7 +457,7 @@ export function AddEditExpenseModal({
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { value: 'Cash', label: t('expenses.cash') || 'Cash', icon: DollarSign, color: 'green' },
-                  { value: 'OrangeMoney', label: t('expenses.orangeMoney') || 'Orange', icon: Smartphone, color: 'orange' },
+                  { value: 'Orange Money', label: t('expenses.orangeMoney') || 'Orange', icon: Smartphone, color: 'orange' },
                   { value: 'Card', label: t('expenses.card') || 'Card', icon: CreditCard, color: 'blue' },
                 ].map(method => {
                   const Icon = method.icon
@@ -526,7 +526,7 @@ export function AddEditExpenseModal({
               </div>
 
               {/* Transaction Ref */}
-              {(formData.paymentMethod === 'OrangeMoney' || formData.paymentMethod === 'Card') && (
+              {(formData.paymentMethod === 'Orange Money' || formData.paymentMethod === 'Card') && (
                 <div>
                   <label className="flex items-center gap-2 text-sm font-medium text-terracotta-700 dark:text-cream-200 mb-2">
                     <FileText className="w-4 h-4" />

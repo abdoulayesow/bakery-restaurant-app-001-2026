@@ -16,7 +16,7 @@ interface Expense {
   categoryId?: string | null
   categoryName: string
   amountGNF: number
-  paymentMethod: 'Cash' | 'OrangeMoney' | 'Card'
+  paymentMethod: string
   description?: string | null
   status: 'Pending' | 'Approved' | 'Rejected'
   submittedByName?: string | null

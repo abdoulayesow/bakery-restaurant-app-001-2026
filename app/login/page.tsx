@@ -42,31 +42,31 @@ export default function LoginPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
-        <Loader2 className="w-8 h-8 text-gold-500 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-cream-50 dark:bg-dark-900">
+        <Loader2 className="w-8 h-8 text-terracotta-500 animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-cream-50 dark:bg-dark-900 px-4">
       <div className="max-w-md w-full">
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <Logo size="lg" variant="icon" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-terracotta-900 dark:text-cream-100">
             {t('common.appName')}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <p className="text-terracotta-600 dark:text-cream-300 mt-2">
             {t('auth.description')}
           </p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white text-center mb-6">
+        <div className="bg-cream-100 dark:bg-dark-800 rounded-2xl warm-shadow p-8">
+          <h2 className="text-xl font-semibold text-terracotta-900 dark:text-cream-100 text-center mb-6">
             {t('auth.welcome')}
           </h2>
 
@@ -80,10 +80,10 @@ export default function LoginPage() {
           <button
             onClick={handleSignIn}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-cream-50 dark:bg-dark-700 border border-terracotta-200 dark:border-dark-600 rounded-xl hover:bg-cream-200 dark:hover:bg-dark-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin text-gray-600 dark:text-gray-300" />
+              <Loader2 className="w-5 h-5 animate-spin text-terracotta-600 dark:text-cream-300" />
             ) : (
               <>
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -104,7 +104,7 @@ export default function LoginPage() {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                <span className="text-gray-700 dark:text-gray-200 font-medium">
+                <span className="text-terracotta-700 dark:text-cream-200 font-medium">
                   {t('auth.signInWith')} {t('auth.google')}
                 </span>
               </>
@@ -118,8 +118,8 @@ export default function LoginPage() {
             onClick={() => setLocale('fr')}
             className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
               locale === 'fr'
-                ? 'bg-gold-600 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                ? 'bg-terracotta-500 text-white'
+                : 'bg-cream-200 dark:bg-dark-700 text-terracotta-700 dark:text-cream-300 hover:bg-cream-300 dark:hover:bg-dark-600'
             }`}
           >
             Français
@@ -128,8 +128,8 @@ export default function LoginPage() {
             onClick={() => setLocale('en')}
             className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
               locale === 'en'
-                ? 'bg-gold-600 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                ? 'bg-terracotta-500 text-white'
+                : 'bg-cream-200 dark:bg-dark-700 text-terracotta-700 dark:text-cream-300 hover:bg-cream-300 dark:hover:bg-dark-600'
             }`}
           >
             English
@@ -137,7 +137,7 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-gray-500 dark:text-gray-500 mt-8">
+        <p className="text-center text-xs text-terracotta-500 dark:text-cream-400 mt-8">
           Bakery Hub © {new Date().getFullYear()}
         </p>
       </div>

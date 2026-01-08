@@ -315,11 +315,24 @@
     "thisQuarter": "Ce trimestre"
   },
   "bakery": {
-    "myBakeries": "Mes boulangeries",
-    "currentlyActive": "Actuellement active",
-    "switchBakery": "Changer de boulangerie",
-    "bakeryAccessible": "boulangerie accessible",
-    "bakeriesAccessible": "boulangeries accessibles"
+    "myBakeries": "Mes Restaurants",
+    "currentlyActive": "Actuellement actif",
+    "switchBakery": "Changer de restaurant",
+    "bakeryAccessible": "restaurant accessible",
+    "bakeriesAccessible": "restaurants accessibles"
+  },
+  "restaurant": {
+    "myRestaurants": "Mes Restaurants",
+    "currentlyActive": "Actuellement actif",
+    "switchRestaurant": "Changer de restaurant",
+    "restaurantAccessible": "restaurant accessible",
+    "restaurantsAccessible": "restaurants accessibles",
+    "types": {
+      "Bakery": "Boulangerie",
+      "Cafe": "Café",
+      "Restaurant": "Restaurant",
+      "FastFood": "Restauration Rapide"
+    }
   },
   "validation": {
     "required": "Requis"
