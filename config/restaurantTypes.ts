@@ -1,36 +1,85 @@
 import { Croissant, Coffee, UtensilsCrossed, Zap, type LucideIcon } from 'lucide-react'
 
-export type RestaurantTypeKey = 'Bakery' | 'Cafe' | 'Restaurant' | 'FastFood'
+/**
+ * Restaurant type configuration
+ * Maps RestaurantType enum from Prisma schema to icons and labels
+ */
+
+export type RestaurantType = 'Bakery' | 'Cafe' | 'Restaurant' | 'FastFood'
 
 export interface RestaurantTypeConfig {
-  key: RestaurantTypeKey
+  type: RestaurantType
   icon: LucideIcon
-  appName: string
+  labelEn: string
+  labelFr: string
+  descriptionEn: string
+  descriptionFr: string
 }
 
-export const restaurantTypeConfig: Record<RestaurantTypeKey, RestaurantTypeConfig> = {
+export const restaurantTypeConfigs: Record<RestaurantType, RestaurantTypeConfig> = {
   Bakery: {
-    key: 'Bakery',
+    type: 'Bakery',
     icon: Croissant,
-    appName: 'Bakery Hub',
+    labelEn: 'Bakery',
+    labelFr: 'Boulangerie',
+    descriptionEn: 'Bread, pastries, and baked goods',
+    descriptionFr: 'Pain, pâtisseries et produits de boulangerie',
   },
   Cafe: {
-    key: 'Cafe',
+    type: 'Cafe',
     icon: Coffee,
-    appName: 'Cafe Hub',
+    labelEn: 'Café',
+    labelFr: 'Café',
+    descriptionEn: 'Coffee shop with light food',
+    descriptionFr: 'Café avec restauration légère',
   },
   Restaurant: {
-    key: 'Restaurant',
+    type: 'Restaurant',
     icon: UtensilsCrossed,
-    appName: 'Restaurant Hub',
+    labelEn: 'Restaurant',
+    labelFr: 'Restaurant',
+    descriptionEn: 'Full-service dining',
+    descriptionFr: 'Service de restauration complet',
   },
   FastFood: {
-    key: 'FastFood',
+    type: 'FastFood',
     icon: Zap,
-    appName: 'Food Hub',
+    labelEn: 'Fast Food',
+    labelFr: 'Restauration Rapide',
+    descriptionEn: 'Quick service restaurant',
+    descriptionFr: 'Service rapide',
   },
 }
 
+/**
+ * Get restaurant type config by type string
+ */
 export function getRestaurantTypeConfig(type: string | undefined): RestaurantTypeConfig {
-  return restaurantTypeConfig[(type as RestaurantTypeKey) || 'Bakery'] || restaurantTypeConfig.Bakery
+  if (type && type in restaurantTypeConfigs) {
+    return restaurantTypeConfigs[type as RestaurantType]
+  }
+  // Default to Bakery if type is unknown
+  return restaurantTypeConfigs.Bakery
+}
+
+/**
+ * Get restaurant type icon component
+ */
+export function getRestaurantTypeIcon(type: string | undefined): LucideIcon {
+  return getRestaurantTypeConfig(type).icon
+}
+
+/**
+ * Get all restaurant types as array for dropdowns
+ */
+export function getAllRestaurantTypes(): RestaurantTypeConfig[] {
+  return Object.values(restaurantTypeConfigs)
+}
+
+/**
+ * Get restaurant type label based on locale
+ */
+export function getRestaurantTypeLabel(type: string | undefined, locale: 'en' | 'fr' = 'en'): string {
+  const config = getRestaurantTypeConfig(type)
+  return locale === 'fr' ? config.labelFr : config.labelEn
 }
