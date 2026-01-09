@@ -121,7 +121,19 @@
     "insufficientStock": "Stock insuffisant",
     "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet article ?",
     "useAdjustToChangeStock": "Utilisez ajuster pour modifier le stock",
-    "reasonPlaceholder": "Optionnel: Ajoutez une raison pour cet ajustement"
+    "reasonPlaceholder": "Optionnel: Ajoutez une raison pour cet ajustement",
+    "item": "article",
+    "items": "articles",
+    "stockLevel": "Niveau de stock",
+    "current": "Actuel",
+    "minimum": "Minimum",
+    "expandAll": "Tout déplier",
+    "collapseAll": "Tout replier",
+    "history": "Historique",
+    "adjustStock": "Ajuster le stock",
+    "stockLevels": "Niveaux de stock",
+    "itemDetails": "Détails de l'article",
+    "viewItem": "Voir l'article"
   },
   "production": {
     "title": "Production",
@@ -218,7 +230,14 @@
     "by": "par",
     "confirmApprove": "Êtes-vous sûr de vouloir approuver cette vente ?",
     "rejectReason": "Veuillez fournir une raison pour le rejet :",
-    "totalMustBePositive": "Le total doit être supérieur à 0"
+    "totalMustBePositive": "Le total doit être supérieur à 0",
+    "salesTrend": "Tendance des ventes",
+    "paymentMethods": "Modes de paiement",
+    "last7Days": "7 jours",
+    "last30Days": "30 jours",
+    "last90Days": "90 jours",
+    "allTime": "Tout",
+    "vsLastPeriod": "vs période précédente"
   },
   "expenses": {
     "title": "Dépenses",
@@ -277,7 +296,10 @@
     "maintenance": "Entretien",
     "rent": "Loyer",
     "marketing": "Marketing",
-    "other": "Autres"
+    "other": "Autres",
+    "periodTotal": "Total de la période",
+    "expenseTrend": "Tendance des dépenses",
+    "categoryDistribution": "Par catégorie"
   },
   "bank": {
     "title": "Banque & Caisse",
@@ -332,6 +354,12 @@
       "Cafe": "Café",
       "Restaurant": "Restaurant",
       "FastFood": "Restauration Rapide"
+    },
+    "appNames": {
+      "bakery": "Bakery Hub",
+      "cafe": "Cafe Hub",
+      "restaurant": "Restaurant Hub",
+      "fastFood": "Food Hub"
     }
   },
   "validation": {
@@ -362,10 +390,14 @@
   "errors": {
     "generic": "Une erreur est survenue",
     "required": "Ce champ est requis",
-    "invalidEmail": "Email invalide",
+    "invalidEmail": "Format d'email invalide",
     "invalidValue": "Valeur invalide",
     "unauthorized": "Non autorisé",
-    "notFound": "Non trouvé"
+    "notFound": "Non trouvé",
+    "restaurantNameRequired": "Le nom du restaurant est requis",
+    "mustBePositive": "Doit être un nombre positif",
+    "failedToLoad": "Échec du chargement des données",
+    "failedToSave": "Échec de l'enregistrement"
   },
   "notifications": {
     "success": "Succès!",
@@ -375,18 +407,70 @@
     "rejected": "Rejeté"
   },
   "settings": {
-    "title": "Paramètres de la Boulangerie",
-    "subtitle": "Configurez les paramètres opérationnels de votre boulangerie",
+    "title": "Paramètres du Restaurant",
+    "subtitle": "Configurez les paramètres opérationnels de votre restaurant",
     "stockDeduction": "Paramètres de Déduction de Stock",
     "stockDeductionDesc": "Choisissez quand le stock d'inventaire doit être déduit pour les journaux de production.",
     "immediateMode": "Déduction Immédiate",
     "immediateModeDesc": "Le stock est déduit immédiatement lors de l'enregistrement de la production. Cela réserve les ingrédients et évite la surallocation.",
     "deferredMode": "Déduction Différée",
     "deferredModeDesc": "Le stock n'est déduit que lorsque le statut de production est marqué comme Complet. Cela permet la planification sans engager l'inventaire.",
-    "recommended": "Recommandé pour la plupart des boulangeries",
+    "recommended": "Recommandé pour la plupart des restaurants",
     "advanced": "Avancé: Nécessite une surveillance attentive du stock",
     "settingsSaved": "Paramètres enregistrés avec succès",
     "moreSettings": "Plus de Paramètres",
-    "comingSoon": "Options de configuration supplémentaires à venir..."
+    "comingSoon": "Options de configuration supplémentaires à venir...",
+    "restaurantType": "Type de Restaurant & Fonctionnalités",
+    "restaurantTypeDesc": "Configurez le type de votre restaurant et les fonctionnalités activées.",
+    "restaurantTypeLabel": "Type de Restaurant",
+    "featureToggles": "Paramètres des Fonctionnalités",
+    "inventoryEnabled": "Gestion des Stocks",
+    "inventoryEnabledDesc": "Suivre les articles d'inventaire, les niveaux de stock et les mouvements",
+    "productionEnabled": "Suivi de Production",
+    "productionEnabledDesc": "Enregistrer la production quotidienne et suivre l'utilisation des ingrédients",
+    "featureDisabledWarning": "Les fonctionnalités désactivées seront masquées du menu de navigation. Vous pouvez les réactiver à tout moment.",
+    "bakeryConfig": "Configuration du Restaurant",
+    "bakeryConfigDesc": "Configurez les informations de base, les paramètres financiers et les coordonnées de ce restaurant.",
+    "basicInfo": "Informations de Base",
+    "bakeryName": "Nom du Restaurant",
+    "location": "Emplacement",
+    "openingDate": "Date d'Ouverture",
+    "trackingStartDate": "Date de Début du Suivi",
+    "financialConfig": "Configuration Financière",
+    "initialCapital": "Capital Initial",
+    "initialCashBalance": "Solde de Caisse Initial",
+    "initialOrangeBalance": "Solde Orange Money Initial",
+    "initialCardBalance": "Solde Carte Initial",
+    "contactInfo": "Informations de Contact",
+    "contactPhone": "Téléphone de Contact",
+    "contactEmail": "Email de Contact",
+    "managerName": "Nom du Gérant",
+    "tabType": "Type & Options",
+    "tabOperations": "Opérations",
+    "tabConfig": "Configuration",
+    "tabRestaurants": "Restaurants",
+    "tabNotifications": "Notifications",
+    "notificationPrefs": "Préférences de Notification",
+    "notificationPrefsDesc": "Configurez comment et quand vous recevez les alertes SMS",
+    "smsAlerts": "Alertes SMS",
+    "lowStockAlerts": "Alertes Stock Faible",
+    "lowStockAlertsDesc": "Recevoir des alertes quand les articles passent sous le stock minimum",
+    "criticalStockAlerts": "Alertes Stock Critique",
+    "criticalStockAlertsDesc": "Recevoir des alertes urgentes pour les articles à stock critique ou en rupture",
+    "expenseAlerts": "Alertes Dépenses",
+    "expenseAlertsDesc": "Être notifié quand des dépenses sont soumises",
+    "approvalAlerts": "Alertes Approbation",
+    "approvalAlertsDesc": "Notifications pour les approbations en attente et les changements de statut",
+    "dailySummary": "Résumé Quotidien",
+    "dailySummaryDesc": "Recevoir un résumé quotidien de l'activité commerciale",
+    "largeExpenseThreshold": "Seuil Dépense Importante",
+    "largeExpenseThresholdDesc": "Alerte quand les dépenses dépassent ce montant (GNF)",
+    "quietHours": "Heures de Silence",
+    "quietHoursDesc": "Pas de notifications pendant ces heures",
+    "quietHoursStart": "Heure de Début",
+    "quietHoursEnd": "Heure de Fin",
+    "clearQuietHours": "Effacer les heures de silence",
+    "notificationLanguage": "Langue des Notifications",
+    "notificationLanguageDesc": "Langue pour les notifications SMS"
   }
 }

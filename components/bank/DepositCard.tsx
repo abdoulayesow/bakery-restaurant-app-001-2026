@@ -100,7 +100,7 @@ export function DepositCard({ deposit, onMarkDeposited, canEdit }: DepositCardPr
 
       {/* Comments */}
       {deposit.comments && (
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 italic">"{deposit.comments}"</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 italic">&ldquo;{deposit.comments}&rdquo;</p>
       )}
 
       {/* Deposited Info */}

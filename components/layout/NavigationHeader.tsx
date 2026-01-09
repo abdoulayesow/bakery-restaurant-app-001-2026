@@ -22,16 +22,14 @@ import {
   ChevronDown,
   Menu,
   X,
-  MapPin,
-  Check,
-  Store,
 } from 'lucide-react'
 import { useLocale } from '@/components/providers/LocaleProvider'
 import { useTheme } from '@/components/providers/ThemeProvider'
 import { useRestaurant } from '@/components/providers/RestaurantProvider'
-import { Logo, colorPalettes, type PaletteName } from '@/components/brand/Logo'
-import { BottomSheet } from '@/components/ui/BottomSheet'
+import { Logo, colorPalettes } from '@/components/brand/Logo'
 import { FloatingActionPicker, type FloatingActionItem } from '@/components/ui/FloatingActionPicker'
+import { useFilteredNavigation } from '@/hooks/useFilteredNavigation'
+import { getRestaurantTypeIcon } from '@/config/restaurantTypes'
 
 // Navigation configuration
 export interface NavSubItem {
@@ -101,8 +99,6 @@ const routeToSubItem: Record<string, string> = {
   '/bank': 'bank',
 }
 
-const paletteNames: PaletteName[] = ['terracotta', 'warmBrown', 'burntSienna', 'gold']
-
 export function NavigationHeader() {
   const { data: session } = useSession()
   const { t, locale, setLocale } = useLocale()
@@ -117,6 +113,9 @@ export function NavigationHeader() {
 
   const accentColor = colorPalettes[currentPalette].primary
   const isManager = session?.user?.role === 'Manager'
+
+  // Filter navigation based on restaurant's enabled features
+  const filteredNavigationItems = useFilteredNavigation(navigationItems)
 
   // Determine active sub-item based on current path
   const activeSubItemId = routeToSubItem[pathname] || ''
@@ -147,24 +146,27 @@ export function NavigationHeader() {
     }
   }
 
-  // Map restaurants to FloatingActionItems - same color for all, active gets current palette color
-  const restaurantPickerItems: FloatingActionItem[] = restaurants.map((restaurant, index) => ({
-    id: restaurant.id,
-    label: restaurant.name,
-    sublabel: restaurant.location || undefined,
-    color: restaurant.id === currentRestaurant?.id
-      ? accentColor
-      : colorPalettes.terracotta.primary, // All unselected use terracotta
-    icon: <Store className="w-5 h-5" strokeWidth={2.5} />,
-    isActive: restaurant.id === currentRestaurant?.id
-  }))
+  // Map restaurants to FloatingActionItems - use restaurant type icon, active gets current palette color
+  const restaurantPickerItems: FloatingActionItem[] = restaurants.map((restaurant) => {
+    const TypeIcon = getRestaurantTypeIcon((restaurant as { restaurantType?: string })?.restaurantType)
+    return {
+      id: restaurant.id,
+      label: restaurant.name,
+      sublabel: restaurant.location || undefined,
+      color: restaurant.id === currentRestaurant?.id
+        ? accentColor
+        : colorPalettes.terracotta.primary, // All unselected use terracotta
+      icon: <TypeIcon className="w-5 h-5" strokeWidth={2.5} />,
+      isActive: restaurant.id === currentRestaurant?.id
+    }
+  })
 
   return (
     <>
       <header className="
         sticky top-0 z-40
-        bg-cream-50/95 dark:bg-dark-900/95 backdrop-blur-md
-        border-b border-terracotta-500/15 dark:border-terracotta-400/20
+        bg-cream-100/95 dark:bg-dark-900/95 backdrop-blur-md
+        border-b border-terracotta-200/60 dark:border-terracotta-400/20
         grain-overlay
       ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -233,7 +235,7 @@ export function NavigationHeader() {
 
             {/* CENTER: Navigation pills (Desktop) */}
             <nav className="hidden lg:flex items-center gap-2" aria-label="Main navigation">
-              {navigationItems.map(item => {
+              {filteredNavigationItems.map(item => {
                 const hasActiveSubItem = item.subItems.some(sub => sub.id === activeSubItemId)
                 const Icon = item.icon
 
@@ -244,7 +246,8 @@ export function NavigationHeader() {
                     aria-expanded={navSheetOpen === item.id}
                     aria-haspopup="true"
                     className={`
-                      flex items-center gap-2 px-4 py-2.5 rounded-full
+                      flex items-center justify-center gap-2
+                      min-w-[130px] px-4 py-2.5 rounded-full
                       font-medium text-sm tracking-wide
                       transition-all duration-300 ease-out
                       ${hasActiveSubItem
@@ -332,59 +335,63 @@ export function NavigationHeader() {
                   <ChevronDown className="w-4 h-4 text-terracotta-600/60 dark:text-cream-300/60" />
                 </button>
 
+                {/* User Dropdown Menu */}
                 {userDropdownOpen && (
                   <div
-                    className="
-                      animate-fade-in-up
-                      absolute top-full right-0 mt-2 w-56
-                      bg-cream-50 dark:bg-dark-900
-                      rounded-2xl warm-shadow-lg grain-overlay
-                      py-2 z-50
-                    "
+                    className="absolute right-0 mt-2 w-60 bg-cream-50 dark:bg-dark-900 rounded-xl shadow-lg border border-terracotta-200/40 dark:border-terracotta-400/20 overflow-hidden z-50"
                     role="menu"
                   >
-                    <div className="px-4 py-3 border-b border-terracotta-500/15 dark:border-terracotta-400/20">
-                      <p className="text-sm font-medium text-terracotta-900 dark:text-cream-100 truncate">
+                    {/* User info header */}
+                    <div className="px-4 py-3 border-b border-terracotta-200/30 dark:border-terracotta-400/15 bg-cream-100/50 dark:bg-dark-800/50">
+                      <p className="text-sm font-semibold text-terracotta-900 dark:text-cream-100 truncate">
                         {session?.user?.name}
                       </p>
-                      <p className="text-xs text-terracotta-600/70 dark:text-cream-300/70 truncate">
+                      <p className="text-xs text-terracotta-600/70 dark:text-cream-300/70 truncate mt-0.5">
                         {session?.user?.email}
                       </p>
                       <span
-                        className="inline-block mt-2 px-2 py-0.5 text-xs rounded-full text-white"
+                        className="inline-block mt-2 px-2 py-0.5 text-xs font-medium rounded-full text-white"
                         style={{ backgroundColor: accentColor }}
                       >
                         {session?.user?.role}
                       </span>
                     </div>
-                    <Link
-                      href="/profile"
-                      onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-terracotta-900 dark:text-cream-100 hover:bg-cream-100 dark:hover:bg-dark-800"
-                      role="menuitem"
-                    >
-                      <User className="w-4 h-4" />
-                      {t('common.profile')}
-                    </Link>
-                    {isManager && (
+
+                    {/* Menu items */}
+                    <div className="py-1">
                       <Link
-                        href="/settings"
+                        href="/profile"
                         onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 text-sm text-terracotta-900 dark:text-cream-100 hover:bg-cream-100 dark:hover:bg-dark-800"
+                        className="flex items-center space-x-3 px-4 py-2.5 text-sm text-terracotta-800 dark:text-cream-200 hover:bg-terracotta-50 dark:hover:bg-dark-800 transition-colors"
                         role="menuitem"
                       >
-                        <Settings className="w-4 h-4" />
-                        {t('common.settings')}
+                        <User className="w-4 h-4 text-terracotta-600 dark:text-cream-400" />
+                        <span>{t('common.profile')}</span>
                       </Link>
-                    )}
-                    <button
-                      onClick={() => signOut({ callbackUrl: '/login' })}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-cream-100 dark:hover:bg-dark-800"
-                      role="menuitem"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      {t('common.logout')}
-                    </button>
+                      {isManager && (
+                        <Link
+                          href="/settings"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center space-x-3 px-4 py-2.5 text-sm text-terracotta-800 dark:text-cream-200 hover:bg-terracotta-50 dark:hover:bg-dark-800 transition-colors"
+                          role="menuitem"
+                        >
+                          <Settings className="w-4 h-4 text-terracotta-600 dark:text-cream-400" />
+                          <span>{t('common.settings')}</span>
+                        </Link>
+                      )}
+                    </div>
+
+                    {/* Logout */}
+                    <div className="border-t border-terracotta-200/30 dark:border-terracotta-400/15 py-1">
+                      <button
+                        onClick={() => signOut({ callbackUrl: '/login' })}
+                        className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                        role="menuitem"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>{t('common.logout')}</span>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -414,7 +421,7 @@ export function NavigationHeader() {
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
             <nav className="lg:hidden py-4 border-t border-terracotta-500/15 dark:border-terracotta-400/20" aria-label="Mobile navigation">
-              {navigationItems.map(item => {
+              {filteredNavigationItems.map(item => {
                 const Icon = item.icon
                 const hasActiveSubItem = item.subItems.some(sub => sub.id === activeSubItemId)
 
@@ -486,12 +493,12 @@ export function NavigationHeader() {
       />
 
       {/* Navigation Floating Pickers */}
-      {navigationItems.map(item => {
+      {filteredNavigationItems.map(item => {
         const navItems: FloatingActionItem[] = item.subItems.map(subItem => ({
           id: subItem.id,
           label: locale === 'fr' ? subItem.labelFr : subItem.label,
           color: activeSubItemId === subItem.id ? accentColor : colorPalettes.terracotta.primary,
-          icon: React.createElement(subItem.icon, { className: 'w-5 h-5', strokeWidth: 2.5 }),
+          icon: React.createElement(subItem.icon, { className: 'w-4 h-4', strokeWidth: 2.5 }),
           isActive: activeSubItemId === subItem.id
         }))
 
@@ -507,7 +514,8 @@ export function NavigationHeader() {
                 window.location.href = subItem.href
               }
             }}
-            position="bottom"
+            position="top"
+            showCloseButton={false}
           />
         )
       })}

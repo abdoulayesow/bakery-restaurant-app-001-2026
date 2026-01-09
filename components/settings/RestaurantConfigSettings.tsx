@@ -69,10 +69,10 @@ export function RestaurantConfigSettings() {
             currency: restaurant.currency || 'GNF'
           })
         } else {
-          setError('Failed to load restaurant configuration')
+          setError(t('errors.failedToLoad') || 'Failed to load restaurant configuration')
         }
       } catch (err) {
-        setError('Failed to load restaurant configuration')
+        setError(t('errors.failedToLoad') || 'Failed to load restaurant configuration')
         console.error(err)
       } finally {
         setLoading(false)
@@ -86,27 +86,27 @@ export function RestaurantConfigSettings() {
     const newErrors: Record<string, string> = {}
 
     if (!config.name.trim()) {
-      newErrors.name = 'Restaurant name is required'
+      newErrors.name = t('errors.restaurantNameRequired') || 'Restaurant name is required'
     }
 
     if (config.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(config.contactEmail)) {
-      newErrors.contactEmail = 'Invalid email format'
+      newErrors.contactEmail = t('errors.invalidEmail') || 'Invalid email format'
     }
 
     if (config.initialCapital < 0) {
-      newErrors.initialCapital = 'Must be positive'
+      newErrors.initialCapital = t('errors.mustBePositive') || 'Must be positive'
     }
 
     if (config.initialCashBalance < 0) {
-      newErrors.initialCashBalance = 'Must be positive'
+      newErrors.initialCashBalance = t('errors.mustBePositive') || 'Must be positive'
     }
 
     if (config.initialOrangeBalance < 0) {
-      newErrors.initialOrangeBalance = 'Must be positive'
+      newErrors.initialOrangeBalance = t('errors.mustBePositive') || 'Must be positive'
     }
 
     if (config.initialCardBalance < 0) {
-      newErrors.initialCardBalance = 'Must be positive'
+      newErrors.initialCardBalance = t('errors.mustBePositive') || 'Must be positive'
     }
 
     setErrors(newErrors)
@@ -134,10 +134,10 @@ export function RestaurantConfigSettings() {
         setTimeout(() => setSaved(false), 3000)
       } else {
         const data = await response.json()
-        setError(data.error || 'Failed to save configuration')
+        setError(data.error || t('errors.failedToSave') || 'Failed to save configuration')
       }
     } catch (err) {
-      setError('Failed to save configuration')
+      setError(t('errors.failedToSave') || 'Failed to save configuration')
       console.error(err)
     } finally {
       setSaving(false)

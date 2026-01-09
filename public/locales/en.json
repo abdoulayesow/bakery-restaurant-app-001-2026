@@ -121,7 +121,19 @@
     "insufficientStock": "Insufficient stock",
     "confirmDelete": "Are you sure you want to delete this item?",
     "useAdjustToChangeStock": "Use adjust to change stock",
-    "reasonPlaceholder": "Optional: Add a reason for this adjustment"
+    "reasonPlaceholder": "Optional: Add a reason for this adjustment",
+    "item": "item",
+    "items": "items",
+    "stockLevel": "Stock Level",
+    "current": "Current",
+    "minimum": "Minimum",
+    "expandAll": "Expand All",
+    "collapseAll": "Collapse All",
+    "history": "History",
+    "adjustStock": "Adjust Stock",
+    "stockLevels": "Stock Levels",
+    "itemDetails": "Item Details",
+    "viewItem": "View Item"
   },
   "production": {
     "title": "Production",
@@ -218,7 +230,14 @@
     "by": "by",
     "confirmApprove": "Are you sure you want to approve this sale?",
     "rejectReason": "Please provide a reason for rejection:",
-    "totalMustBePositive": "Total must be greater than 0"
+    "totalMustBePositive": "Total must be greater than 0",
+    "salesTrend": "Sales Trend",
+    "paymentMethods": "Payment Methods",
+    "last7Days": "7 Days",
+    "last30Days": "30 Days",
+    "last90Days": "90 Days",
+    "allTime": "All",
+    "vsLastPeriod": "vs last period"
   },
   "expenses": {
     "title": "Expenses",
@@ -277,7 +296,10 @@
     "maintenance": "Maintenance",
     "rent": "Rent",
     "marketing": "Marketing",
-    "other": "Other"
+    "other": "Other",
+    "periodTotal": "Period Total",
+    "expenseTrend": "Expense Trend",
+    "categoryDistribution": "By Category"
   },
   "bank": {
     "title": "Bank & Cash",
@@ -332,6 +354,12 @@
       "Cafe": "Café",
       "Restaurant": "Restaurant",
       "FastFood": "Fast Food"
+    },
+    "appNames": {
+      "bakery": "Bakery Hub",
+      "cafe": "Cafe Hub",
+      "restaurant": "Restaurant Hub",
+      "fastFood": "Food Hub"
     }
   },
   "validation": {
@@ -362,10 +390,14 @@
   "errors": {
     "generic": "An error occurred",
     "required": "This field is required",
-    "invalidEmail": "Invalid email",
+    "invalidEmail": "Invalid email format",
     "invalidValue": "Invalid value",
     "unauthorized": "Unauthorized",
-    "notFound": "Not found"
+    "notFound": "Not found",
+    "restaurantNameRequired": "Restaurant name is required",
+    "mustBePositive": "Must be a positive number",
+    "failedToLoad": "Failed to load data",
+    "failedToSave": "Failed to save changes"
   },
   "notifications": {
     "success": "Success!",
@@ -375,18 +407,70 @@
     "rejected": "Rejected"
   },
   "settings": {
-    "title": "Bakery Settings",
-    "subtitle": "Configure your bakery operational settings",
+    "title": "Restaurant Settings",
+    "subtitle": "Configure your restaurant operational settings",
     "stockDeduction": "Stock Deduction Settings",
     "stockDeductionDesc": "Choose when inventory stock should be deducted for production logs.",
     "immediateMode": "Immediate Deduction",
     "immediateModeDesc": "Stock is deducted immediately when production is logged. This reserves ingredients and prevents over-allocation.",
     "deferredMode": "Deferred Deduction",
     "deferredModeDesc": "Stock is only deducted when production status is marked as Complete. This allows planning without committing inventory.",
-    "recommended": "Recommended for most bakeries",
+    "recommended": "Recommended for most restaurants",
     "advanced": "Advanced: Requires careful stock monitoring",
     "settingsSaved": "Settings saved successfully",
     "moreSettings": "More Settings",
-    "comingSoon": "Additional configuration options coming soon..."
+    "comingSoon": "Additional configuration options coming soon...",
+    "restaurantType": "Restaurant Type & Features",
+    "restaurantTypeDesc": "Configure your restaurant type and enabled features.",
+    "restaurantTypeLabel": "Restaurant Type",
+    "featureToggles": "Feature Settings",
+    "inventoryEnabled": "Inventory Management",
+    "inventoryEnabledDesc": "Track inventory items, stock levels, and movements",
+    "productionEnabled": "Production Tracking",
+    "productionEnabledDesc": "Log daily production and track ingredient usage",
+    "featureDisabledWarning": "Disabled features will be hidden from the navigation menu. You can re-enable them at any time.",
+    "bakeryConfig": "Restaurant Configuration",
+    "bakeryConfigDesc": "Configure basic information, financial settings, and contact details for this restaurant.",
+    "basicInfo": "Basic Information",
+    "bakeryName": "Restaurant Name",
+    "location": "Location",
+    "openingDate": "Opening Date",
+    "trackingStartDate": "Tracking Start Date",
+    "financialConfig": "Financial Configuration",
+    "initialCapital": "Initial Capital",
+    "initialCashBalance": "Initial Cash Balance",
+    "initialOrangeBalance": "Initial Orange Money Balance",
+    "initialCardBalance": "Initial Card Balance",
+    "contactInfo": "Contact Information",
+    "contactPhone": "Contact Phone",
+    "contactEmail": "Contact Email",
+    "managerName": "Manager Name",
+    "tabType": "Type & Features",
+    "tabOperations": "Operations",
+    "tabConfig": "Configuration",
+    "tabRestaurants": "Restaurants",
+    "tabNotifications": "Notifications",
+    "notificationPrefs": "Notification Preferences",
+    "notificationPrefsDesc": "Configure how and when you receive SMS alerts",
+    "smsAlerts": "SMS Alerts",
+    "lowStockAlerts": "Low Stock Alerts",
+    "lowStockAlertsDesc": "Receive alerts when items fall below minimum stock",
+    "criticalStockAlerts": "Critical Stock Alerts",
+    "criticalStockAlertsDesc": "Receive urgent alerts for critically low or out-of-stock items",
+    "expenseAlerts": "Expense Alerts",
+    "expenseAlertsDesc": "Get notified when expenses are submitted",
+    "approvalAlerts": "Approval Alerts",
+    "approvalAlertsDesc": "Notifications for pending approvals and status changes",
+    "dailySummary": "Daily Summary",
+    "dailySummaryDesc": "Receive a daily summary of business activity",
+    "largeExpenseThreshold": "Large Expense Threshold",
+    "largeExpenseThresholdDesc": "Alert when expenses exceed this amount (GNF)",
+    "quietHours": "Quiet Hours",
+    "quietHoursDesc": "No notifications during these hours",
+    "quietHoursStart": "Start Time",
+    "quietHoursEnd": "End Time",
+    "clearQuietHours": "Clear quiet hours",
+    "notificationLanguage": "Notification Language",
+    "notificationLanguageDesc": "Language for SMS notifications"
   }
 }
