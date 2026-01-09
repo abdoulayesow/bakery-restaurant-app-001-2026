@@ -341,6 +341,7 @@ export function NavigationHeader() {
                       animate-fade-in-up
                       absolute right-0 top-14 w-56
                       bg-cream-50 dark:bg-dark-900
+                      border border-terracotta-200/60 dark:border-terracotta-400/20
                       rounded-2xl warm-shadow-lg grain-overlay
                       py-2 z-50
                     "
@@ -494,7 +495,7 @@ export function NavigationHeader() {
           id: subItem.id,
           label: locale === 'fr' ? subItem.labelFr : subItem.label,
           color: activeSubItemId === subItem.id ? accentColor : colorPalettes.terracotta.primary,
-          icon: React.createElement(subItem.icon, { className: 'w-5 h-5', strokeWidth: 2.5 }),
+          icon: React.createElement(subItem.icon, { className: 'w-4 h-4', strokeWidth: 2.5 }),
           isActive: activeSubItemId === subItem.id
         }))
 

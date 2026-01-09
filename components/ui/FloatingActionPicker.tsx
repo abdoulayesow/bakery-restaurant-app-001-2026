@@ -99,8 +99,8 @@ export function FloatingActionPicker({
               onClose()
             }}
             className={`
-              flex items-center gap-3 px-5 py-3 rounded-full
-              font-semibold text-base tracking-wide
+              flex items-center gap-2 px-4 py-2 rounded-full
+              font-medium text-sm tracking-wide
               text-white shadow-md
               transition-all duration-300 ease-out
               hover:shadow-lg hover:scale-105 active:scale-95
@@ -115,7 +115,7 @@ export function FloatingActionPicker({
           >
             {/* Icon */}
             {item.icon && (
-              <span className="w-5 h-5 flex items-center justify-center">
+              <span className="w-4 h-4 flex items-center justify-center">
                 {item.icon}
               </span>
             )}
@@ -125,7 +125,7 @@ export function FloatingActionPicker({
 
             {/* Active indicator */}
             {item.isActive && (
-              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             )}
           </button>
         ))}
