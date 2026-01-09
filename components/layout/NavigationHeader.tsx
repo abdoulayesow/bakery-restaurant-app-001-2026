@@ -303,7 +303,7 @@ export function NavigationHeader() {
               </button>
 
               {/* User menu */}
-              <div className="relative user-dropdown-container">
+              <div className="user-dropdown-container">
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                   className="
@@ -334,91 +334,6 @@ export function NavigationHeader() {
                   </span>
                   <ChevronDown className="w-4 h-4 text-terracotta-600/60 dark:text-cream-300/60" />
                 </button>
-
-                {userDropdownOpen && (
-                  <div
-                    className="
-                      animate-fade-in-up
-                      absolute right-0 top-14 w-60
-                      bg-cream-50 dark:bg-dark-900
-                      border border-terracotta-200/60 dark:border-terracotta-400/20
-                      rounded-2xl warm-shadow-lg grain-overlay
-                      overflow-hidden
-                      z-50
-                    "
-                    role="menu"
-                  >
-                    {/* User info header */}
-                    <div className="px-4 py-4 border-b border-terracotta-500/15 dark:border-terracotta-400/20 bg-gradient-to-br from-cream-100/50 to-transparent dark:from-dark-800/50">
-                      <p className="text-sm font-semibold text-terracotta-900 dark:text-cream-100 truncate">
-                        {session?.user?.name}
-                      </p>
-                      <p className="text-xs text-terracotta-600/70 dark:text-cream-300/70 truncate mt-0.5">
-                        {session?.user?.email}
-                      </p>
-                      <span
-                        className="inline-block mt-2.5 px-2.5 py-0.5 text-xs font-medium rounded-full text-white shadow-sm"
-                        style={{ backgroundColor: accentColor }}
-                      >
-                        {session?.user?.role}
-                      </span>
-                    </div>
-
-                    {/* Menu items */}
-                    <div className="py-1.5">
-                      <Link
-                        href="/profile"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="
-                          flex items-center gap-3 px-4 py-2.5
-                          text-sm font-medium text-terracotta-900 dark:text-cream-100
-                          hover:bg-terracotta-50 dark:hover:bg-dark-800
-                          transition-colors duration-200
-                          group
-                        "
-                        role="menuitem"
-                      >
-                        <User className="w-4 h-4 text-terracotta-600 dark:text-cream-300 group-hover:text-terracotta-700 dark:group-hover:text-cream-100 transition-colors" />
-                        <span>{t('common.profile')}</span>
-                      </Link>
-                      {isManager && (
-                        <Link
-                          href="/settings"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="
-                            flex items-center gap-3 px-4 py-2.5
-                            text-sm font-medium text-terracotta-900 dark:text-cream-100
-                            hover:bg-terracotta-50 dark:hover:bg-dark-800
-                            transition-colors duration-200
-                            group
-                          "
-                          role="menuitem"
-                        >
-                          <Settings className="w-4 h-4 text-terracotta-600 dark:text-cream-300 group-hover:text-terracotta-700 dark:group-hover:text-cream-100 transition-colors" />
-                          <span>{t('common.settings')}</span>
-                        </Link>
-                      )}
-                    </div>
-
-                    {/* Logout - separated with border */}
-                    <div className="border-t border-terracotta-500/15 dark:border-terracotta-400/20 py-1.5">
-                      <button
-                        onClick={() => signOut({ callbackUrl: '/login' })}
-                        className="
-                          w-full flex items-center gap-3 px-4 py-2.5
-                          text-sm font-medium text-red-600 dark:text-red-400
-                          hover:bg-red-50 dark:hover:bg-red-950/30
-                          transition-colors duration-200
-                          group
-                        "
-                        role="menuitem"
-                      >
-                        <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                        <span>{t('common.logout')}</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Mobile Menu Button */}
@@ -507,6 +422,92 @@ export function NavigationHeader() {
           )}
         </div>
       </header>
+
+      {/* User Dropdown Menu - Positioned below header */}
+      {userDropdownOpen && (
+        <div
+          className="
+            animate-fade-in-up
+            fixed right-4 top-20 w-60
+            bg-cream-50 dark:bg-dark-900
+            border border-terracotta-200/60 dark:border-terracotta-400/20
+            rounded-2xl warm-shadow-lg grain-overlay
+            overflow-hidden
+            z-50
+          "
+          role="menu"
+        >
+          {/* User info header */}
+          <div className="px-4 py-4 border-b border-terracotta-500/15 dark:border-terracotta-400/20 bg-gradient-to-br from-cream-100/50 to-transparent dark:from-dark-800/50">
+            <p className="text-sm font-semibold text-terracotta-900 dark:text-cream-100 truncate">
+              {session?.user?.name}
+            </p>
+            <p className="text-xs text-terracotta-600/70 dark:text-cream-300/70 truncate mt-0.5">
+              {session?.user?.email}
+            </p>
+            <span
+              className="inline-block mt-2.5 px-2.5 py-0.5 text-xs font-medium rounded-full text-white shadow-sm"
+              style={{ backgroundColor: accentColor }}
+            >
+              {session?.user?.role}
+            </span>
+          </div>
+
+          {/* Menu items */}
+          <div className="py-1.5">
+            <Link
+              href="/profile"
+              onClick={() => setUserDropdownOpen(false)}
+              className="
+                flex items-center gap-3 px-4 py-2.5
+                text-sm font-medium text-terracotta-900 dark:text-cream-100
+                hover:bg-terracotta-50 dark:hover:bg-dark-800
+                transition-colors duration-200
+                group
+              "
+              role="menuitem"
+            >
+              <User className="w-4 h-4 text-terracotta-600 dark:text-cream-300 group-hover:text-terracotta-700 dark:group-hover:text-cream-100 transition-colors" />
+              <span>{t('common.profile')}</span>
+            </Link>
+            {isManager && (
+              <Link
+                href="/settings"
+                onClick={() => setUserDropdownOpen(false)}
+                className="
+                  flex items-center gap-3 px-4 py-2.5
+                  text-sm font-medium text-terracotta-900 dark:text-cream-100
+                  hover:bg-terracotta-50 dark:hover:bg-dark-800
+                  transition-colors duration-200
+                  group
+                "
+                role="menuitem"
+              >
+                <Settings className="w-4 h-4 text-terracotta-600 dark:text-cream-300 group-hover:text-terracotta-700 dark:group-hover:text-cream-100 transition-colors" />
+                <span>{t('common.settings')}</span>
+              </Link>
+            )}
+          </div>
+
+          {/* Logout - separated with border */}
+          <div className="border-t border-terracotta-500/15 dark:border-terracotta-400/20 py-1.5">
+            <button
+              onClick={() => signOut({ callbackUrl: '/login' })}
+              className="
+                w-full flex items-center gap-3 px-4 py-2.5
+                text-sm font-medium text-red-600 dark:text-red-400
+                hover:bg-red-50 dark:hover:bg-red-950/30
+                transition-colors duration-200
+                group
+              "
+              role="menuitem"
+            >
+              <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <span>{t('common.logout')}</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Floating Restaurant Picker */}
       <FloatingActionPicker
